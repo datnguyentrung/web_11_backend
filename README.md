@@ -88,14 +88,14 @@ Tạo file `.env` trong thư mục gốc với các biến sau:
 
 ```properties
 # JWT
-JWT_BASE64_SECRET=your_base64_secret_key_here
+JWT_BASE64_SECRET=TKeq+EY8YJvX3hDTlt6Wor8TxGyYDYSs5Nieew3VAzL0G9XQcNFFJNOmIv2isY2ol8F9d29wnbdD7azzM0oqFQ==
 JWT_ACCESS_TOKEN_VALIDITY_IN_SECONDS=86400
 JWT_REFRESH_TOKEN_VALIDITY_IN_SECONDS=2592000
 # Password Policy
 TIME_PASSWORD_CHANGE_DAYS=90
 # Bytescale (File Upload)
-BYTESCALE_ACCOUNT_ID=your_account_id
-BYTESCALE_API_KEY=your_api_key
+BYTESCALE_ACCOUNT_ID=kW2K8fv
+BYTESCALE_API_KEY=secret_kW2K8fv6edXkqG7Tj91PRv4hXGaZ
 # Server
 PORT=8080
 ```
