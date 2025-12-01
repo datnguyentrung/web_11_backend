@@ -51,11 +51,11 @@ public class PoomsaeListService {
         String tournamentId = "a8d5c830-c275-41b0-a251-294eb61c007f";
         for (PoomsaeListDTO.CompetitorDTO competitor : competitors) {
             // Lấy sẵn thông tin
-            Student student = studentService.getStudentByIdAccount(competitor.getPersonalAcademicInfo().getPersonalInfo().getIdAccount());
+            Student student = studentService.getStudentByIdAccount(competitor.getIdAccount());
             if (student == null)
-                throw new IdInvalidException("Student not found: " + competitor.getPersonalAcademicInfo().getPersonalInfo().getIdAccount());
+                throw new IdInvalidException("Student not found: " + competitor.getIdAccount());
             if (!student.getIsActive())
-                throw new IdInvalidException("Student is not active: " + competitor.getPersonalAcademicInfo().getPersonalInfo().getIdAccount());
+                throw new IdInvalidException("Student is not active: " + competitor.getIdAccount());
 
 //            String tournamentId = competitor.getCompetition().getIdTournament();
             String poomsaeCombId = competitor.getCompetition().getIdPoomsaeCombination();

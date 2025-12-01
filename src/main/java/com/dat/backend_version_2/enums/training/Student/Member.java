@@ -6,4 +6,5 @@ public enum Member {
     SILVER,
     BRONZE,
     PREMIUM,
+    DIAMOND
 }

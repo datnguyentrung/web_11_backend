@@ -17,9 +17,7 @@ public class PoomsaeListMapper {
         PoomsaeListDTO.CompetitorDTO competitorDTO = new PoomsaeListDTO.CompetitorDTO();
         competitorDTO.setCompetition(poomsaeListToCompetitionDTO(poomsaeList));
         competitorDTO.setMedal(poomsaeList.getMedal());
-        competitorDTO.setPersonalAcademicInfo(
-                StudentMapper.studentToPersonalAcademicInfo(poomsaeList.getStudent())
-        );
+        competitorDTO.setIdAccount(poomsaeList.getStudent().getIdAccount());
         return competitorDTO;
     }
 

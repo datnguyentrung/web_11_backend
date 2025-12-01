@@ -13,11 +13,20 @@ public class PoomsaeListDTO {
     private String idPoomsaeList;
     private CompetitorDTO competitor;
 
+//    @Data
+//    @NoArgsConstructor
+//    @AllArgsConstructor
+//    public static class CompetitorDTO {
+//        private StudentRes.PersonalAcademicInfo personalAcademicInfo;
+//        private Medal medal;
+//        private CompetitionDTO competition;
+//    }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CompetitorDTO {
-        private StudentRes.PersonalAcademicInfo personalAcademicInfo;
+        private String idAccount;
         private Medal medal;
         private CompetitionDTO competition;
     }
