@@ -45,7 +45,7 @@ public class CoachAttendanceController {
      * @return Thông báo kết quả điểm danh
      */
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('ADMIN') and @userSec.isActive()")
+    @PreAuthorize("hasAnyAuthority('COACH','ADMIN') and @userSec.isActive()")
     public ResponseEntity<String> createCoachAttendance(
             @RequestBody CoachAttendanceDTO.CreateRequest createRequest,
             @AuthenticationPrincipal Jwt jwt,
