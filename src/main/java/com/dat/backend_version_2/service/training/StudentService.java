@@ -15,7 +15,6 @@ import com.dat.backend_version_2.util.error.UserNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.validator.internal.constraintvalidators.hv.NormalizedValidator;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -33,13 +32,12 @@ public class StudentService {
     private final UsersService usersService;
     private final ClassSessionService classSessionService;
     private final StudentClassSessionService studentClassSessionService;
-    private final NormalizedValidator normalizedValidator;
 
     /**
      * Asserts that a student exists and is active by account ID.
      *
      * @param idAccount the account ID to check.
-     * @throws IllegalArgumentException if idAccount is null or empty.
+     * @throws IllegalArgumentException  if idAccount is null or empty.
      * @throws ResourceNotFoundException if student does not exist or is inactive.
      */
     public void assertStudentIsActive(String idAccount) {
@@ -141,7 +139,7 @@ public class StudentService {
      * @param idAccount the account ID to search for
      * @return the active student
      * @throws IllegalArgumentException if idAccount is null or empty
-     * @throws UserNotFoundException if no active student found with the given account ID
+     * @throws UserNotFoundException    if no active student found with the given account ID
      */
     public Student getActiveStudentByIdAccount(String idAccount) throws IllegalArgumentException, UserNotFoundException {
         if (idAccount == null || idAccount.trim().isEmpty()) {
@@ -172,14 +170,19 @@ public class StudentService {
         // Ví dụ khớp: "090", "+84", "098-123", "(024)"
         boolean isPhoneSearch = normalizedKeyword.matches("^[0-9+\\-\\(\\) ]+$");
 
-        if (isPhoneSearch){
+        if (isPhoneSearch) {
             // LOGIC TÌM THEO SỐ ĐIỆN THOẠI
             String searchPhone = normalizedKeyword.replaceAll("[^0-9]", ""); // Chỉ giữ lại chữ số
-            return studentRepository.searchByPhoneNumber(searchPhone);
+            return studentRepository.searchByPhoneNumber(searchPhone).stream()
+                    .map(StudentMapper::studentQuickViewToPersonalAcademicInfo)
+                    .toList();
         } else {
             // LOGIC TÌM THEO TÊN
             String searchName = normalizedKeyword.toLowerCase();
-            return studentRepository.searchByName(searchName);
+            return studentRepository.searchByName(searchName).stream()
+                    .map(StudentMapper::studentQuickViewToPersonalAcademicInfo)
+                    .toList();
+//            throw new UnsupportedOperationException("Search by name is not implemented yet.");
         }
     }
 }

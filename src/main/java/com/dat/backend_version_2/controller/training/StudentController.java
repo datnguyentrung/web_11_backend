@@ -98,8 +98,8 @@ public class StudentController {
 
     @GetMapping("/search")
     public ResponseEntity<List<StudentRes.PersonalAcademicInfo>> search(
-            @RequestParam String keyword) throws JsonProcessingException {
+            @RequestParam String query) throws JsonProcessingException {
         return ResponseEntity.status(HttpStatus.OK)
-                .body(studentService.searchStudents(keyword));
+                .body(studentService.searchStudents(query));
     }
 }

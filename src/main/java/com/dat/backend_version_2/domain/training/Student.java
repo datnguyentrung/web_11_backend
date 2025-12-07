@@ -19,7 +19,15 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @PrimaryKeyJoinColumn(name = "idUser") // chỉ định PK join với Users.idUser
-@Table(name = "Student", schema = "training")
+@Table(
+        name = "Student",
+        schema = "training",
+        indexes = {
+                @Index(name = "idx_student_branch", columnList = "branch"),
+                @Index(name = "idx_student_belt_level", columnList = "beltLevel"),
+                @Index(name = "idx_student_is_active", columnList = "isActive")
+        }
+)
 public class Student extends Users {
     private String idNational;
 

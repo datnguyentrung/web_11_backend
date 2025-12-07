@@ -5,8 +5,12 @@ import com.dat.backend_version_2.domain.training.StudentClassSession;
 import com.dat.backend_version_2.dto.authentication.UserRes;
 import com.dat.backend_version_2.dto.training.Student.StudentReq;
 import com.dat.backend_version_2.dto.training.Student.StudentRes;
+import com.dat.backend_version_2.enums.training.BeltLevel;
+import com.dat.backend_version_2.repository.training.StudentQuickView;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -110,5 +114,50 @@ public class StudentMapper {
                 studentToUserInfo(student),
                 studentToUserProfile(student)
         );
+    }
+
+    public static StudentRes.PersonalInfo studentQuickViewToPersonalInfo(StudentQuickView view) {
+        if (view == null) return null;
+        LocalDate birthDate = null;
+        if (view.getBirthDate() != null && !view.getBirthDate().isBlank()) {
+            birthDate = LocalDate.parse(view.getBirthDate());
+        }
+        return new StudentRes.PersonalInfo(
+                view.getName(),
+                view.getIdAccount(),
+                view.getIdNational(),
+                birthDate,
+                view.getIsActive()
+        );
+    }
+
+    public static StudentRes.AcademicInfo studentQuickViewToAcademicInfo(StudentQuickView view) {
+        if (view == null) return null;
+        BeltLevel beltLevel = null;
+        if (view.getBeltLevel() != null && !view.getBeltLevel().isBlank()) {
+            beltLevel = BeltLevel.valueOf(view.getBeltLevel());
+        }
+        // Xử lý chuỗi lớp học thành danh sách
+        List<String> classSessions = new ArrayList<>();
+        if (view.getClassSessions() != null && !view.getClassSessions().isBlank()) {
+            String[] sessionsArray = view.getClassSessions().split(",");
+            for (String session : sessionsArray) {
+                classSessions.add(session.trim());
+            }
+        }
+        return new StudentRes.AcademicInfo(
+                view.getIdBranch(),
+                beltLevel,
+                classSessions
+        );
+    }
+
+    public static StudentRes.PersonalAcademicInfo studentQuickViewToPersonalAcademicInfo (StudentQuickView view){
+        if (view == null) return null;
+
+        StudentRes.PersonalInfo personalInfo = studentQuickViewToPersonalInfo(view);
+        StudentRes.AcademicInfo academicInfo = studentQuickViewToAcademicInfo(view);
+
+        return new StudentRes.PersonalAcademicInfo(personalInfo, academicInfo);
     }
 }

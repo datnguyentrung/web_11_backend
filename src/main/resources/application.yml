@@ -37,13 +37,13 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update # none, validate, update, create, create-drop, update
+      ddl-auto: validate # none, validate, update, create, create-drop, update
     database: postgresql
     show-sql: true
     open-in-view: true
     repositories:
       enabled: true
-    defer-datasource-initialization: true
+    defer-datasource-initialization: false
     properties:
       hibernate:
         jdbc:
@@ -66,6 +66,11 @@ spring:
 
   jackson:
     time-zone: Asia/Ho_Chi_Minh
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 1
 
 logging:
   level:

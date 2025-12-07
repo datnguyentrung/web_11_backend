@@ -47,12 +47,42 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
     Optional<Student> findByIdAccountAndIsActive(String idAccount, Boolean isActive);
 
     @Query(value = """
-            SELECT *
+            SELECT s.id_user                                        AS idUser,
+                s.name                                              AS name,
+                s.id_national                                       AS idNational,
+                s.birth_date                                        AS birthDate,
+                s.is_active                                         AS isActive,
+                s.branch                                            AS idBranch,
+                s.belt_level                                        AS beltLevel,
+            
+                COALESCE(STRING_AGG(scs.id_class_session, ','), '') AS classSessions
             FROM training.student s
-            WHERE s.phone LIKE '%' || :phone || '%'""", nativeQuery = true)
-    List<StudentRes.PersonalAcademicInfo> searchByPhoneNumber(
+                 LEFT JOIN training.student_class_session scs on s.id_user = scs.id_user
+            WHERE s.phone LIKE '%' || :phone || '%'
+                AND s.is_active = TRUE
+            GROUP BY s.id_user
+            LIMIT 20""", nativeQuery = true)
+    List<StudentQuickView> searchByPhoneNumber(
             @Param("phone") String searchPhone
     );
 
-    List<StudentRes.PersonalAcademicInfo> searchByName(String searchName);
+    @Query(value = """
+            SELECT s.id_user                                        AS idUser,
+                s.name                                              AS name,
+                s.id_national                                       AS idNational,
+                s.birth_date                                        AS birthDate,
+                s.is_active                                         AS isActive,
+                s.branch                                            AS idBranch,
+                s.belt_level                                        AS beltLevel,
+            
+                COALESCE(STRING_AGG(scs.id_class_session, ','), '') AS classSessions
+            FROM training.student s
+                 LEFT JOIN training.student_class_session scs on s.id_user = scs.id_user
+            WHERE public.f_unaccent(s.name) ILIKE '%' || public.f_unaccent(:keyword) || '%'
+              AND s.is_active = TRUE
+            GROUP BY s.id_user
+            LIMIT 20""", nativeQuery = true)
+    List<StudentQuickView> searchByName(
+            @Param("keyword") String searchName
+    );
 }
