@@ -45,32 +45,9 @@ public class AgeGroupService {
         // 1️⃣ Tạo mới AgeGroup
         AgeGroup ageGroup = new AgeGroup();
         ageGroup.setAgeGroupName(ageGroupDTO.getAgeGroupName());
-        ageGroup.setStartAge(ageGroupDTO.getStartAge());
-        ageGroup.setEndAge(ageGroupDTO.getEndAge());
+        ageGroup.setMinAge(ageGroupDTO.getMinAge());
+        ageGroup.setMaxAge(ageGroupDTO.getMaxAge());
         ageGroup.setIsActive(true);
-        ageGroupRepository.save(ageGroup);
-
-        // 2️⃣ Lấy toàn bộ BeltGroup và PoomsaeContent hiện có
-        List<BeltGroup> beltGroups = beltGroupRepository.findAll();
-        List<PoomsaeContent> poomsaeContents = poomsaeContentService.getAllPoomsaeContent();
-
-        List<PoomsaeCombination> poomsaeCombinations = new ArrayList<>();
-
-        // 3️⃣ Tạo tổ hợp cho từng nội dung thi đấu và nhóm đai
-        for (PoomsaeContent poomsaeContent : poomsaeContents) {
-            for (BeltGroup beltGroup : beltGroups) {
-                PoomsaeCombination combination = new PoomsaeCombination();
-                combination.setPoomsaeContent(poomsaeContent);
-                combination.setAgeGroup(ageGroup);
-                combination.setBeltGroup(beltGroup);
-                poomsaeCombinations.add(combination);
-            }
-        }
-
-        // 4️⃣ Lưu toàn bộ combination vào DB
-        poomsaeCombinationRepository.saveAll(poomsaeCombinations);
-
-        return ageGroup;
+        return ageGroupRepository.save(ageGroup);
     }
-
 }

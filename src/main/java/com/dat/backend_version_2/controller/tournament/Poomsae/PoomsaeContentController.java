@@ -1,7 +1,6 @@
 package com.dat.backend_version_2.controller.tournament.Poomsae;
 
 import com.dat.backend_version_2.domain.tournament.Poomsae.PoomsaeContent;
-import com.dat.backend_version_2.enums.tournament.PoomsaeTypes;
 import com.dat.backend_version_2.service.tournament.Poomsae.PoomsaeContentService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
 import lombok.RequiredArgsConstructor;
@@ -28,13 +27,13 @@ public class PoomsaeContentController {
     // 🟢 Lấy nội dung thi đấu theo ID
     @GetMapping("/{id}")
     public ResponseEntity<PoomsaeContent> getPoomsaeContentById(@PathVariable Integer id) throws IdInvalidException {
-        PoomsaeContent content = poomsaeContentService.getPoomsaeContent(id);
+        PoomsaeContent content = poomsaeContentService.getPoomsaeContentById(id);
         return ResponseEntity.ok(content);
     }
 
     // 🟡 Tạo mới nội dung thi đấu (và tự động tạo combinations)
     @PostMapping
-    public ResponseEntity<PoomsaeContent> createPoomsaeContent(@RequestParam PoomsaeTypes contentName) {
+    public ResponseEntity<PoomsaeContent> createPoomsaeContent(@RequestParam String contentName) {
         PoomsaeContent newContent = poomsaeContentService.createPoomsaeContent(contentName);
         return ResponseEntity.status(HttpStatus.CREATED).body(newContent);
     }

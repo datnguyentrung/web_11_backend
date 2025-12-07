@@ -9,11 +9,13 @@ import com.dat.backend_version_2.enums.training.BeltLevel;
 import com.dat.backend_version_2.mapper.training.StudentMapper;
 import com.dat.backend_version_2.repository.training.StudentRepository;
 import com.dat.backend_version_2.service.authentication.UsersService;
+import com.dat.backend_version_2.util.ConverterUtils;
 import com.dat.backend_version_2.util.error.IdInvalidException;
 import com.dat.backend_version_2.util.error.UserNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.validator.internal.constraintvalidators.hv.NormalizedValidator;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,7 @@ public class StudentService {
     private final UsersService usersService;
     private final ClassSessionService classSessionService;
     private final StudentClassSessionService studentClassSessionService;
+    private final NormalizedValidator normalizedValidator;
 
     /**
      * Asserts that a student exists and is active by account ID.
@@ -149,6 +152,35 @@ public class StudentService {
                 .orElseThrow(() -> new UserNotFoundException(
                         "No active student found with account ID: " + idAccount
                 ));
+    }
+
+    public List<StudentRes.PersonalAcademicInfo> searchStudents(String keyword) {
+        // 1. Kiểm tra null và xóa khoảng trắng thừa ở đầu/cuối
+        if (keyword == null) {
+            return List.of();
+        }
+
+        String normalizedKeyword = ConverterUtils.removeAccents(keyword.trim());
+
+        // Nếu sau khi xóa khoảng trắng mà chuỗi rỗng -> Trả về list rỗng
+        if (normalizedKeyword.isEmpty()) {
+            return List.of();
+        }
+
+        // 2. Kiểm tra xem có phải tìm kiếm theo số điện thoại không
+        // Regex này kiểm tra: Chuỗi chỉ chứa số, dấu +, dấu -, dấu ngoặc (), hoặc khoảng trắng
+        // Ví dụ khớp: "090", "+84", "098-123", "(024)"
+        boolean isPhoneSearch = normalizedKeyword.matches("^[0-9+\\-\\(\\) ]+$");
+
+        if (isPhoneSearch){
+            // LOGIC TÌM THEO SỐ ĐIỆN THOẠI
+            String searchPhone = normalizedKeyword.replaceAll("[^0-9]", ""); // Chỉ giữ lại chữ số
+            return studentRepository.searchByPhoneNumber(searchPhone);
+        } else {
+            // LOGIC TÌM THEO TÊN
+            String searchName = normalizedKeyword.toLowerCase();
+            return studentRepository.searchByName(searchName);
+        }
     }
 }
 

@@ -24,6 +24,6 @@ public class AgeGroup {
     private String ageGroupName;
     private Boolean isActive = true;
 
-    private Integer startAge;
-    private Integer endAge;
+    private Integer minAge;
+    private Integer maxAge;
 }

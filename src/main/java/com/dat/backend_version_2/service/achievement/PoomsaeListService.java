@@ -4,7 +4,7 @@ import com.dat.backend_version_2.domain.achievement.PoomsaeList;
 import com.dat.backend_version_2.domain.tournament.Poomsae.PoomsaeCombination;
 import com.dat.backend_version_2.domain.tournament.Tournament;
 import com.dat.backend_version_2.domain.training.Student;
-import com.dat.backend_version_2.dto.achievement.PoomsaeListDTO;
+import com.dat.backend_version_2.dto.achievement.CompetitorBaseDTO;
 import com.dat.backend_version_2.repository.achievement.PoomsaeListRepository;
 import com.dat.backend_version_2.service.tournament.Poomsae.PoomsaeCombinationService;
 import com.dat.backend_version_2.service.tournament.TournamentService;
@@ -40,16 +40,29 @@ public class PoomsaeListService {
         return poomsaeListRepository.findByTournament(tournament);
     }
 
+    public List<PoomsaeList> getPoomsaeListByFilter(
+            String idTournament,
+            String idPoomsaeCombination,
+            String idAccount,
+            Integer idBranch
+    ) throws IdInvalidException {
+        return poomsaeListRepository.findByFilter(
+                UUID.fromString(idTournament),
+                UUID.fromString(idPoomsaeCombination),
+                idAccount != null ? studentService.getStudentByIdAccount(idAccount).getIdUser() : null,
+                idBranch
+        );
+    }
+
     @Transactional
-    public void createPoomsaeList(List<PoomsaeListDTO.CompetitorDTO> competitors) throws IdInvalidException {
+    public void createPoomsaeList(List<CompetitorBaseDTO.CompetitorInputDTO> competitors) throws IdInvalidException {
         if (competitors == null || competitors.isEmpty()) {
             throw new IdInvalidException("Competitor list is empty");
         }
 
         List<PoomsaeList> poomsaeLists = new ArrayList<>(competitors.size());
 
-        String tournamentId = "a8d5c830-c275-41b0-a251-294eb61c007f";
-        for (PoomsaeListDTO.CompetitorDTO competitor : competitors) {
+        for (CompetitorBaseDTO.CompetitorInputDTO competitor : competitors) {
             // Lấy sẵn thông tin
             Student student = studentService.getStudentByIdAccount(competitor.getIdAccount());
             if (student == null)
@@ -58,13 +71,13 @@ public class PoomsaeListService {
                 throw new IdInvalidException("Student is not active: " + competitor.getIdAccount());
 
 //            String tournamentId = competitor.getCompetition().getIdTournament();
-            String poomsaeCombId = competitor.getCompetition().getIdPoomsaeCombination();
+            String poomsaeCombId = competitor.getCompetition().getIdCombination();
 
-            Tournament tournament = tournamentService.getTournamentById(tournamentId);
+            Tournament tournament = tournamentService.getTournamentById(competitor.getCompetition().getIdTournament());
             PoomsaeCombination combination = poomsaeCombinationService.getCombinationById(poomsaeCombId);
 
             if (tournament == null)
-                throw new IdInvalidException("Tournament not found: " + tournamentId);
+                throw new IdInvalidException("Tournament not found: " + competitor.getCompetition().getIdTournament());
             if (combination == null)
                 throw new IdInvalidException("Poomsae Combination not found: " + poomsaeCombId);
 

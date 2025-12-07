@@ -66,4 +66,20 @@ public interface PoomsaeHistoryRepository extends JpaRepository<PoomsaeHistory, 
             @Param("levelNode") Integer levelNode,
             @Param("sourceNode") Integer sourceNode
     );
+
+
+    @Query(value = """
+            SELECT EXISTS(SELECT 1
+              FROM tournament.poomsae_history ph
+                   JOIN achievement.poomsae_list pl
+                        ON ph.poomsae_list = pl.id_poomsae_list
+              WHERE pl.tournament = :idTournament
+                AND pl.poomsae_combination = :idPoomsaeCombination
+                AND (:idUser IS NULL OR pl.student_id_user = :idUser));
+            """, nativeQuery = true)
+    boolean existsByFilter(
+            @Param("idTournament") UUID idTournament,
+            @Param("idPoomsaeCombination") UUID idPoomsaeCombination,
+            @Param("idUser") UUID idUser
+    );
 }

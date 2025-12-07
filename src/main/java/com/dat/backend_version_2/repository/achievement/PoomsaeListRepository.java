@@ -17,10 +17,10 @@ public interface PoomsaeListRepository extends JpaRepository<PoomsaeList, UUID> 
     @Query("""
             SELECT DISTINCT p
             FROM PoomsaeList p
-            JOIN FETCH p.student s
-            JOIN FETCH p.tournament t
-            JOIN FETCH p.branch b
-            JOIN FETCH p.poomsaeCombination pc
+                JOIN FETCH p.student s
+                JOIN FETCH p.tournament t
+                JOIN FETCH p.branch b
+                JOIN FETCH p.poomsaeCombination pc
             WHERE p.idPoomsaeList IN :ids
             """)
     List<PoomsaeList> findAllByIdPoomsaeList(@Param("ids") List<UUID> ids);
@@ -37,4 +37,22 @@ public interface PoomsaeListRepository extends JpaRepository<PoomsaeList, UUID> 
     @Query("SELECT DISTINCT p FROM PoomsaeList p WHERE p.tournament = :tournament")
     List<PoomsaeList> findByTournament(@Param("tournament") Tournament tournament);
 
+    @Query(value = """
+            SELECT pl
+            FROM PoomsaeList pl
+            JOIN FETCH pl.student s
+            LEFT JOIN FETCH pl.branch b
+            LEFT JOIN FETCH pl.poomsaeCombination pc
+            LEFT JOIN FETCH pl.tournament t
+            WHERE pl.tournament.idTournament = :tournamentId
+              AND pl.poomsaeCombination.idPoomsaeCombination = :poomsaeCombinationId
+              AND (:branchId IS NULL OR b.idBranch = :branchId)
+              AND (:studentId IS NULL OR s.idUser = :studentId)
+            """)
+    List<PoomsaeList> findByFilter(
+            @Param("tournamentId") UUID tournamentId,
+            @Param("poomsaeCombinationId") UUID poomsaeCombination,
+            @Param("studentId") UUID studentId,
+            @Param("branchId") Integer branchId
+    );
 }

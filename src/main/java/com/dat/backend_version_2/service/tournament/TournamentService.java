@@ -2,6 +2,7 @@ package com.dat.backend_version_2.service.tournament;
 
 import com.dat.backend_version_2.domain.tournament.Tournament;
 import com.dat.backend_version_2.dto.tournament.TournamentDTO;
+import com.dat.backend_version_2.enums.tournament.TournamentState;
 import com.dat.backend_version_2.mapper.tournament.TournamentMapper;
 import com.dat.backend_version_2.repository.tournament.TournamentRepository;
 import com.dat.backend_version_2.util.error.IdInvalidException;
@@ -25,6 +26,10 @@ public class TournamentService {
     public Tournament getTournamentById(String tournamentId) throws IdInvalidException {
         return tournamentRepository.findById(UUID.fromString(tournamentId))
                 .orElseThrow(() -> new IdInvalidException("Tournament not found with id: " + tournamentId));
+    }
+
+    public List<Tournament> getTournamentsByTournamentState(TournamentState state) throws IdInvalidException {
+        return tournamentRepository.findByTournamentState(state);
     }
 
     public Tournament getTournamentByNameAndTournamentDate(String tournamentName, LocalDate tournamentDate) throws IdInvalidException {

@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.text.Normalizer;
+import java.util.regex.Pattern;
 
 public class ConverterUtils {
     public static LocalDate instantToLocalDate(Instant instant) {
@@ -23,5 +25,17 @@ public class ConverterUtils {
             case 4 -> List.of(10, 11, 12);
             default -> List.of();
         };
+    }
+
+    // Hàm này chuyển "Nguyễn Văn A" -> "Nguyen Van A"
+    public static String removeAccents(String input) {
+        if (input == null) return null;
+
+        // Chuẩn hóa Unicode tổ hợp
+        String temp = Normalizer.normalize(input, Normalizer.Form.NFD);
+
+        // Xóa các dấu thanh (sắc, huyền, hỏi, ngã, nặng)
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        return pattern.matcher(temp).replaceAll("").replace('đ', 'd').replace('Đ', 'D');
     }
 }

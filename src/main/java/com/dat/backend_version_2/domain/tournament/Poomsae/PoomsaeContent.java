@@ -1,6 +1,5 @@
 package com.dat.backend_version_2.domain.tournament.Poomsae;
 
-import com.dat.backend_version_2.enums.tournament.PoomsaeTypes;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -18,7 +17,6 @@ public class PoomsaeContent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idPoomsaeContent;
 
-    @Enumerated(EnumType.STRING)
-    private PoomsaeTypes contentName;
+    private String contentName;
     private Boolean isActive = true;
 }

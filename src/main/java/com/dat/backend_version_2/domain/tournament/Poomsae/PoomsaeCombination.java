@@ -2,6 +2,7 @@ package com.dat.backend_version_2.domain.tournament.Poomsae;
 
 import com.dat.backend_version_2.domain.tournament.AgeGroup;
 import com.dat.backend_version_2.domain.tournament.BeltGroup;
+import com.dat.backend_version_2.domain.tournament.Tournament;
 import com.dat.backend_version_2.enums.tournament.PoomsaeMode;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -16,7 +17,6 @@ import java.util.UUID;
 @Entity
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "PoomsaeCombination", schema = "tournament")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class PoomsaeCombination {
@@ -30,6 +30,10 @@ public class PoomsaeCombination {
     @JoinColumn(name = "poomsae_content")
     private PoomsaeContent poomsaeContent;
 
+    @ManyToOne
+    @JoinColumn(name = "id_tournament")
+    private Tournament tournament;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "age_group")
     private AgeGroup ageGroup;
@@ -38,8 +42,13 @@ public class PoomsaeCombination {
     @JoinColumn(name = "belt_group")
     private BeltGroup beltGroup;
 
-    private Boolean isActive = false;
-
     @Enumerated(EnumType.STRING)
     private PoomsaeMode poomsaeMode = PoomsaeMode.ELIMINATION;
+
+    public PoomsaeCombination(Tournament tournament,PoomsaeContent poomsaeContent, AgeGroup ageGroup, BeltGroup beltGroup) {
+        this.tournament = tournament;
+        this.poomsaeContent = poomsaeContent;
+        this.ageGroup = ageGroup;
+        this.beltGroup = beltGroup;
+    }
 }

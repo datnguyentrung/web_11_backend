@@ -45,30 +45,9 @@ public class BeltGroupService {
         // 1️⃣ Tạo mới BeltGroup
         BeltGroup beltGroup = new BeltGroup();
         beltGroup.setBeltGroupName(beltGroupDTO.getBeltGroupName());
-        beltGroup.setBeltLevels(beltGroupDTO.getBeltLevels());
+        beltGroup.setStartBelt(beltGroupDTO.getStartBelt());
+        beltGroup.setEndBelt(beltGroupDTO.getEndBelt());
         beltGroup.setIsActive(true);
-        beltGroupRepository.save(beltGroup);
-
-        // 2️⃣ Lấy toàn bộ AgeGroup và PoomsaeContent hiện có
-        List<AgeGroup> ageGroups = ageGroupRepository.findAll();
-        List<PoomsaeContent> poomsaeContents = poomsaeContentService.getAllPoomsaeContent();
-
-        List<PoomsaeCombination> poomsaeCombinations = new ArrayList<>();
-
-        // 3️⃣ Tạo tổ hợp cho từng nội dung thi đấu và lứa tuổi
-        for (PoomsaeContent poomsaeContent : poomsaeContents) {
-            for (AgeGroup ageGroup : ageGroups) {
-                PoomsaeCombination combination = new PoomsaeCombination();
-                combination.setPoomsaeContent(poomsaeContent);
-                combination.setAgeGroup(ageGroup);
-                combination.setBeltGroup(beltGroup);
-                poomsaeCombinations.add(combination);
-            }
-        }
-
-        // 4️⃣ Lưu toàn bộ combination vào DB
-        poomsaeCombinationRepository.saveAll(poomsaeCombinations);
-
-        return beltGroup;
+        return beltGroupRepository.save(beltGroup);
     }
 }

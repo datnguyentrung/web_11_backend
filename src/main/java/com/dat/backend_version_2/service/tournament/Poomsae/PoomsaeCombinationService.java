@@ -1,13 +1,22 @@
 package com.dat.backend_version_2.service.tournament.Poomsae;
 
+import com.dat.backend_version_2.domain.tournament.AgeGroup;
+import com.dat.backend_version_2.domain.tournament.BeltGroup;
 import com.dat.backend_version_2.domain.tournament.Poomsae.PoomsaeCombination;
+import com.dat.backend_version_2.domain.tournament.Poomsae.PoomsaeContent;
+import com.dat.backend_version_2.domain.tournament.Tournament;
+import com.dat.backend_version_2.dto.tournament.PoomsaeCombinationDTO;
 import com.dat.backend_version_2.enums.tournament.PoomsaeMode;
 import com.dat.backend_version_2.repository.tournament.Poomsae.PoomsaeCombinationRepository;
+import com.dat.backend_version_2.service.tournament.AgeGroupService;
+import com.dat.backend_version_2.service.tournament.BeltGroupService;
+import com.dat.backend_version_2.service.tournament.TournamentService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,6 +24,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PoomsaeCombinationService {
     private final PoomsaeCombinationRepository poomsaeCombinationRepository;
+    private final PoomsaeContentService poomsaeContentService;
+    private final BeltGroupService beltGroupService;
+    private final AgeGroupService ageGroupService;
+    private final TournamentService tournamentService;
 
     @Transactional(readOnly = true)  // Giữ session active cho đến khi response được serialize
     public List<PoomsaeCombination> getAllCombinations() {
@@ -28,20 +41,8 @@ public class PoomsaeCombinationService {
     }
 
     @Transactional
-    public PoomsaeCombination createCombination(PoomsaeCombination combination) {
-        return poomsaeCombinationRepository.save(combination);
-    }
-
-    @Transactional
     public void deleteCombination(String id) {
         poomsaeCombinationRepository.deleteById(UUID.fromString(id));
-    }
-
-    @Transactional
-    public void changeActiveStatus(String id, boolean isActive) throws IdInvalidException {
-        PoomsaeCombination combination = getCombinationById(id);
-        combination.setIsActive(isActive);
-        poomsaeCombinationRepository.save(combination);
     }
 
     @Transactional
@@ -53,5 +54,21 @@ public class PoomsaeCombinationService {
             combination.setPoomsaeMode(mode);
         }
         poomsaeCombinationRepository.saveAll(combinations);
+    }
+
+    @Transactional
+    public void createPoomsaeCombinations(PoomsaeCombinationDTO.CreateRequest requests) throws IdInvalidException {
+        poomsaeCombinationRepository.bulkInsertCombinations(
+                UUID.fromString(requests.getIdTournament()),
+                requests.getIdPoomsaeContent(),
+                requests.getIdBeltGroup(),
+                requests.getIdAgeGroup()
+        );
+    }
+
+    public List<PoomsaeCombination> getCombinationByIdTournament(String idTournament) throws IdInvalidException {
+        return poomsaeCombinationRepository.findByTournament(
+                tournamentService.getTournamentById(idTournament)
+        );
     }
 }

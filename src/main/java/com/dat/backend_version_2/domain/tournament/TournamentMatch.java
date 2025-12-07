@@ -1,7 +1,7 @@
 package com.dat.backend_version_2.domain.tournament;
 
 import com.dat.backend_version_2.dto.tournament.TournamentMatchId;
-import com.dat.backend_version_2.enums.tournament.TournamentTypes;
+import com.dat.backend_version_2.enums.tournament.TournamentType;
 import com.dat.backend_version_2.enums.training.ClassSession.Session;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -52,7 +52,7 @@ public class TournamentMatch {
 
     // ---- Match properties ----
     @Enumerated(EnumType.STRING)
-    private TournamentTypes tournamentType;
+    private TournamentType tournamentType;
 
     @Enumerated(EnumType.STRING)
     private Session session;

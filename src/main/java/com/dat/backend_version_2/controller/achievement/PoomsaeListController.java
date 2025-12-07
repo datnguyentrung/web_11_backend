@@ -1,7 +1,7 @@
 package com.dat.backend_version_2.controller.achievement;
 
 import com.dat.backend_version_2.domain.achievement.PoomsaeList;
-import com.dat.backend_version_2.dto.achievement.PoomsaeListDTO;
+import com.dat.backend_version_2.dto.achievement.CompetitorBaseDTO;
 import com.dat.backend_version_2.mapper.achievement.PoomsaeListMapper;
 import com.dat.backend_version_2.service.achievement.PoomsaeListService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
@@ -18,10 +18,10 @@ public class PoomsaeListController {
     private final PoomsaeListService poomsaeListService;
 
     @GetMapping
-    public ResponseEntity<List<PoomsaeListDTO>> getAll() {
-        List<PoomsaeListDTO> result = poomsaeListService.getAllPoomsaeList()
+    public ResponseEntity<List<CompetitorBaseDTO>> getAll() {
+        List<CompetitorBaseDTO> result = poomsaeListService.getAllPoomsaeList()
                 .stream()
-                .map(PoomsaeListMapper::poomsaeListToDTO)
+                .map(PoomsaeListMapper::poomsaeListToCompetitorBaseDTO)
                 .toList();
         return ResponseEntity.ok(result);
     }
@@ -33,7 +33,7 @@ public class PoomsaeListController {
     }
 
     @PostMapping
-    public ResponseEntity<String> create(@RequestBody List<PoomsaeListDTO.CompetitorDTO> competitorDTOS) {
+    public ResponseEntity<String> create(@RequestBody List<CompetitorBaseDTO.CompetitorInputDTO> competitorDTOS) {
         try {
             poomsaeListService.createPoomsaeList(competitorDTOS);
             return ResponseEntity.ok("All Poomsae lists created successfully");
@@ -45,13 +45,26 @@ public class PoomsaeListController {
     }
 
     @GetMapping("/tournament/{idTournament}")
-    public ResponseEntity<List<PoomsaeListDTO>> getByIdTournament(
+    public ResponseEntity<List<CompetitorBaseDTO>> getByIdTournament(
             @PathVariable String idTournament) throws IdInvalidException {
-        List<PoomsaeListDTO> poomsaeListDTOS = poomsaeListService
+        List<CompetitorBaseDTO> poomsaeListDTOS = poomsaeListService
                 .getPoomsaeListByIdTournament(idTournament)
                 .stream()
-                .map(PoomsaeListMapper::poomsaeListToDTO)
+                .map(PoomsaeListMapper::poomsaeListToCompetitorBaseDTO)
                 .toList();
         return ResponseEntity.ok(poomsaeListDTOS);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<CompetitorBaseDTO>> getByFilter(
+            @RequestParam String idTournament,
+            @RequestParam String idCombination,
+            @RequestParam(required = false) Integer idBranch,
+            @RequestParam(required = false) String idAccount
+    ) throws IdInvalidException {
+        return ResponseEntity.ok(poomsaeListService.getPoomsaeListByFilter(idTournament, idCombination, idAccount, idBranch)
+                .stream()
+                .map(PoomsaeListMapper::poomsaeListToCompetitorBaseDTO)
+                .toList());
     }
 }

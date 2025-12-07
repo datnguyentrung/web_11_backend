@@ -11,6 +11,7 @@ import com.dat.backend_version_2.repository.achievement.PoomsaeListRepository;
 import com.dat.backend_version_2.repository.tournament.Poomsae.PoomsaeHistoryRepository;
 import com.dat.backend_version_2.service.achievement.PoomsaeListService;
 import com.dat.backend_version_2.service.tournament.BracketNodeService;
+import com.dat.backend_version_2.service.training.StudentService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -32,6 +33,7 @@ public class PoomsaeHistoryService {
     private final PoomsaeCombinationService poomsaeCombinationService;
     private static final Logger log = LoggerFactory.getLogger(PoomsaeHistoryService.class);
     private final PoomsaeListService poomsaeListService;
+    private final StudentService studentService;
 
     public PoomsaeHistory getPoomsaeHistoryById(String id) throws IdInvalidException {
         return poomsaeHistoryRepository.findById(UUID.fromString(id))
@@ -311,5 +313,13 @@ public class PoomsaeHistoryService {
                 .stream()
                 .map(PoomsaeHistoryMapper::poomsaeHistoryToPoomsaeHistoryDTO)
                 .toList();
+    }
+
+    public boolean checkPoomsaeHistoryExists(String idTournament, String idCombination, String idAccount) {
+        return poomsaeHistoryRepository.existsByFilter(
+                idTournament != null ? UUID.fromString(idTournament) : null,
+                idCombination != null ? UUID.fromString(idCombination) : null,
+                idAccount != null ? studentService.getStudentByIdAccount(idAccount).getIdUser() : null
+        );
     }
 }

@@ -15,4 +15,26 @@ public class PoomsaeCombinationDTO {
         private List<String> idPoomsaeCombinations;
         private PoomsaeMode poomsaeMode;
     }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CreateRequest {
+        private List<Integer> idPoomsaeContent;
+        private List<Integer> idBeltGroup;
+        private List<Integer> idAgeGroup;
+        private String idTournament;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CombinationDetail {
+        private String idPoomsaeCombination;
+        private String idTournament;
+        private String poomsaeContentName;
+        private BeltGroupDTO beltGroupDTO;
+        private AgeGroupDTO ageGroupDTO;
+        private PoomsaeMode poomsaeMode;
+    }
 }

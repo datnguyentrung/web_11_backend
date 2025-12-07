@@ -1,6 +1,7 @@
 package com.dat.backend_version_2.domain.tournament;
 
-import com.dat.backend_version_2.enums.tournament.TournamentStatus;
+import com.dat.backend_version_2.enums.tournament.TournamentScope;
+import com.dat.backend_version_2.enums.tournament.TournamentState;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,5 +29,8 @@ public class Tournament {
     private String location;
 
     @Enumerated(EnumType.STRING)
-    private TournamentStatus tournamentStatus;
+    private TournamentScope tournamentScope;
+
+    @Enumerated(EnumType.STRING)
+    private TournamentState tournamentState;
 }

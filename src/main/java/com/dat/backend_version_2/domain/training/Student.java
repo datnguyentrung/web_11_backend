@@ -5,18 +5,17 @@ import com.dat.backend_version_2.enums.training.Student.Member;
 import com.dat.backend_version_2.enums.training.BeltLevel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.Hibernate;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @PrimaryKeyJoinColumn(name = "idUser") // chỉ định PK join với Users.idUser
@@ -39,6 +38,8 @@ public class Student extends Users {
 
     @OneToMany(mappedBy = "student", cascade = {CascadeType.REMOVE, CascadeType.MERGE}, orphanRemoval = true) // ✅ SỬA ĐỔI
     @JsonIgnore
+    @EqualsAndHashCode.Exclude // 👈 THÊM DÒNG NÀY: Chặn sinh equals/hashCode
+    @ToString.Exclude          // 👈 THÊM DÒNG NÀY: Chặn sinh toString (phòng hờ)
     private List<StudentClassSession> studentClassSessions = new ArrayList<>();
 
     private LocalDate startDate = LocalDate.now();
@@ -48,4 +49,18 @@ public class Student extends Users {
     private Member member;
 
     private String phone;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Student student = (Student) o;
+        // Chỉ so sánh ID (giả sử getIdUser() lấy từ lớp cha Users)
+        return getIdUser() != null && Objects.equals(getIdUser(), student.getIdUser());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

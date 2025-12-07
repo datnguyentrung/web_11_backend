@@ -9,25 +9,25 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PoomsaeListDTO {
-    private String idPoomsaeList;
-    private CompetitorDTO competitor;
-
-//    @Data
-//    @NoArgsConstructor
-//    @AllArgsConstructor
-//    public static class CompetitorDTO {
-//        private StudentRes.PersonalAcademicInfo personalAcademicInfo;
-//        private Medal medal;
-//        private CompetitionDTO competition;
-//    }
+public class CompetitorBaseDTO {
+    private String idCompetitor;
+    private CompetitorDetailDTO competitorDetailDTO;
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class CompetitorDTO {
+    public static class CompetitorInputDTO {
         private String idAccount;
-        private Medal medal;
+        private Medal medal; // Giả sử Medal là một enum hoặc class
+        private CompetitionDTO competition;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CompetitorDetailDTO {
+        private StudentRes.PersonalAcademicInfo personalAcademicInfo;
+        private Medal medal; // Giả sử Medal là một enum hoặc class
         private CompetitionDTO competition;
     }
 
@@ -36,6 +36,6 @@ public class PoomsaeListDTO {
     @AllArgsConstructor
     public static class CompetitionDTO {
         private String idTournament;
-        private String idPoomsaeCombination;
+        private String idCombination;
     }
 }

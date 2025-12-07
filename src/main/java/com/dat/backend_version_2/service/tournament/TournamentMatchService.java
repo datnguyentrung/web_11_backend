@@ -1,13 +1,10 @@
 package com.dat.backend_version_2.service.tournament;
 
-import com.dat.backend_version_2.domain.tournament.Poomsae.PoomsaeCombination;
 import com.dat.backend_version_2.domain.tournament.Tournament;
 import com.dat.backend_version_2.domain.tournament.TournamentMatch;
 import com.dat.backend_version_2.dto.tournament.TournamentMatchDTO;
 import com.dat.backend_version_2.dto.tournament.TournamentMatchId;
-import com.dat.backend_version_2.enums.tournament.PoomsaeTypes;
-import com.dat.backend_version_2.enums.tournament.TournamentTypes;
-import com.dat.backend_version_2.mapper.tournament.TournamentMatchMapper;
+import com.dat.backend_version_2.enums.tournament.TournamentType;
 import com.dat.backend_version_2.repository.tournament.Sparring.TournamentMatchRepository;
 import com.dat.backend_version_2.service.tournament.Poomsae.PoomsaeCombinationService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
@@ -83,15 +80,12 @@ public class TournamentMatchService {
         newMatch.setTournamentType(matchInfo.getTournamentType());
         newMatch.setParticipants(keyInfo.getParticipants());
 
-        if (matchInfo.getTournamentType() == TournamentTypes.POOMSAE) {
-            PoomsaeTypes contentName = poomsaeCombinationService.getCombinationById(keyInfo.getIdCombination())
+        if (matchInfo.getTournamentType() == TournamentType.POOMSAE) {
+            String contentName = poomsaeCombinationService.getCombinationById(keyInfo.getIdCombination())
                     .getPoomsaeContent().getContentName();
             System.out.println("Content Name: " + contentName);
 
-            if (contentName == PoomsaeTypes.FEMALE_TEAM
-                    || contentName == PoomsaeTypes.MALE_TEAM
-                    || contentName == PoomsaeTypes.PAIR
-                    || contentName == PoomsaeTypes.MIXED_TEAM){
+            if (contentName != null && (contentName.contains("TEAM") || contentName.contains("PAIR"))) {
                 newMatch.setDuration(Duration.ofMinutes(15));
             } else {
                 if (keyInfo.getTargetNode() == -1 || keyInfo.getTargetNode() == 0) {
@@ -100,7 +94,7 @@ public class TournamentMatchService {
                     newMatch.setDuration(Duration.ofMinutes(3));
                 }
             }
-        } else if (matchInfo.getTournamentType() == TournamentTypes.SPARRING) {
+        } else if (matchInfo.getTournamentType() == TournamentType.SPARRING) {
             if (keyInfo.getTargetNode() == -1 || keyInfo.getTargetNode() == 0) {
                 newMatch.setDuration(Duration.ofMinutes(10));
             } else {

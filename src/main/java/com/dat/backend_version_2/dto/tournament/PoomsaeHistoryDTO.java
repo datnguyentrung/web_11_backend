@@ -1,6 +1,5 @@
 package com.dat.backend_version_2.dto.tournament;
 
-import com.dat.backend_version_2.enums.tournament.PoomsaeTypes;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -41,6 +40,6 @@ public class PoomsaeHistoryDTO {
     public static class PoomsaeCategory {
         private String ageGroupName;
         private String beltGroupName;
-        private PoomsaeTypes contentName;
+        private String contentName;
     }
 }

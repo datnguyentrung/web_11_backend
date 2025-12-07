@@ -4,7 +4,7 @@ import com.dat.backend_version_2.domain.tournament.Poomsae.PoomsaeCombination;
 import com.dat.backend_version_2.domain.tournament.TournamentMatch;
 import com.dat.backend_version_2.dto.tournament.PoomsaeHistoryDTO;
 import com.dat.backend_version_2.dto.tournament.TournamentMatchDTO;
-import com.dat.backend_version_2.enums.tournament.TournamentTypes;
+import com.dat.backend_version_2.enums.tournament.TournamentType;
 import com.dat.backend_version_2.mapper.tournament.TournamentMatchMapper;
 import com.dat.backend_version_2.service.tournament.Poomsae.PoomsaeCombinationService;
 import com.dat.backend_version_2.service.tournament.TournamentMatchService;
@@ -91,7 +91,7 @@ public class TournamentMatchController {
                         TournamentMatchDTO dto = TournamentMatchMapper.tournamentMatchToDTO(match);
 
                         // --- Gắn categoryName nếu là POOMSAE ---
-                        if (dto.getMatchInfo().getTournamentType() == TournamentTypes.POOMSAE) {
+                        if (dto.getMatchInfo().getTournamentType() == TournamentType.POOMSAE) {
                             try {
                                 UUID comboId = UUID.fromString(dto.getKeyInfo().getIdCombination());
                                 PoomsaeCombination combo = poomsaeCombinationMap.get(comboId);

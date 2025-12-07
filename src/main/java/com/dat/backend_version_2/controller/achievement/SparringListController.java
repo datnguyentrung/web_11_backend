@@ -1,7 +1,7 @@
 package com.dat.backend_version_2.controller.achievement;
 
 import com.dat.backend_version_2.domain.achievement.SparringList;
-import com.dat.backend_version_2.dto.achievement.SparringListDTO;
+import com.dat.backend_version_2.dto.achievement.CompetitorBaseDTO;
 import com.dat.backend_version_2.mapper.achievement.SparringListMapper;
 import com.dat.backend_version_2.service.achievement.SparringListService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
@@ -18,8 +18,8 @@ public class SparringListController {
     private final SparringListService sparringListService;
 
     @GetMapping
-    public ResponseEntity<List<SparringListDTO>> getAll() {
-        List<SparringListDTO> result = sparringListService.getAllSparringList()
+    public ResponseEntity<List<CompetitorBaseDTO>> getAll() {
+        List<CompetitorBaseDTO> result = sparringListService.getAllSparringList()
                 .stream()
                 .map(SparringListMapper::sparringListToDTO)
                 .toList();
@@ -33,7 +33,7 @@ public class SparringListController {
     }
 
     @PostMapping
-    public ResponseEntity<String> create(@RequestBody List<SparringListDTO.CompetitorDTO> competitorDTOS) {
+    public ResponseEntity<String> create(@RequestBody List<CompetitorBaseDTO.CompetitorInputDTO> competitorDTOS) {
         try {
             sparringListService.createSparringList(competitorDTOS);
             return ResponseEntity.ok("All Sparring lists created successfully");
@@ -45,9 +45,9 @@ public class SparringListController {
     }
 
     @GetMapping("/tournament/{idTournament}")
-    public ResponseEntity<List<SparringListDTO>> getByIdTournament(
+    public ResponseEntity<List<CompetitorBaseDTO>> getByIdTournament(
             @PathVariable String idTournament) throws IdInvalidException {
-        List<SparringListDTO> sparringListDTOS = sparringListService
+        List<CompetitorBaseDTO> sparringListDTOS = sparringListService
                 .getSparringListByIdTournament(idTournament)
                 .stream()
                 .map(SparringListMapper::sparringListToDTO)
