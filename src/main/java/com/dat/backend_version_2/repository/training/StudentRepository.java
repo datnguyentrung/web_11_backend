@@ -9,10 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Repository
 public interface StudentRepository extends JpaRepository<Student, UUID> {
@@ -47,42 +44,49 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
     Optional<Student> findByIdAccountAndIsActive(String idAccount, Boolean isActive);
 
     @Query(value = """
-            SELECT s.id_user                                        AS idUser,
-                s.name                                              AS name,
-                s.id_national                                       AS idNational,
-                s.birth_date                                        AS birthDate,
-                s.is_active                                         AS isActive,
-                s.branch                                            AS idBranch,
-                s.belt_level                                        AS beltLevel,
+            SELECT s.id_user                    AS idUser,
+                u.id_account                    AS idAccount,
+                s.name                          AS name,
+                s.id_national                   AS idNational,
+                s.birth_date                    AS birthDate,
+                s.is_active                     AS isActive,
+                s.branch                        AS idBranch,
+                s.belt_level                    AS beltLevel,
             
-                COALESCE(STRING_AGG(scs.id_class_session, ','), '') AS classSessions
+                (SELECT COALESCE(STRING_AGG(scs.id_class_session, ','), '')
+                 FROM training.student_class_session scs
+                 WHERE scs.id_user = s.id_user) AS classSessions
             FROM training.student s
-                 LEFT JOIN training.student_class_session scs on s.id_user = scs.id_user
+                 LEFT JOIN authentication.users u on s.id_user = u.id_user
             WHERE s.phone LIKE '%' || :phone || '%'
-                AND s.is_active = TRUE
-            GROUP BY s.id_user
+              AND s.is_active = TRUE
+            GROUP BY s.id_user, u.id_account
             LIMIT 20""", nativeQuery = true)
     List<StudentQuickView> searchByPhoneNumber(
             @Param("phone") String searchPhone
     );
 
     @Query(value = """
-            SELECT s.id_user                                        AS idUser,
-                s.name                                              AS name,
-                s.id_national                                       AS idNational,
-                s.birth_date                                        AS birthDate,
-                s.is_active                                         AS isActive,
-                s.branch                                            AS idBranch,
-                s.belt_level                                        AS beltLevel,
+            SELECT s.id_user                    AS idUser,
+                u.id_account                    AS idAccount,
+                s.name                          AS name,
+                s.id_national                   AS idNational,
+                s.birth_date                    AS birthDate,
+                s.is_active                     AS isActive,
+                s.branch                        AS idBranch,
+                s.belt_level                    AS beltLevel,
             
-                COALESCE(STRING_AGG(scs.id_class_session, ','), '') AS classSessions
+                (SELECT COALESCE(STRING_AGG(scs.id_class_session, ','), '')
+                 FROM training.student_class_session scs
+                 WHERE scs.id_user = s.id_user) AS classSessions
             FROM training.student s
-                 LEFT JOIN training.student_class_session scs on s.id_user = scs.id_user
+                 LEFT JOIN authentication.users u on s.id_user = u.id_user
             WHERE public.f_unaccent(s.name) ILIKE '%' || public.f_unaccent(:keyword) || '%'
               AND s.is_active = TRUE
-            GROUP BY s.id_user
             LIMIT 20""", nativeQuery = true)
     List<StudentQuickView> searchByName(
             @Param("keyword") String searchName
     );
+
+    List<Student> findAllByIdAccountIn(Collection<String> idAccounts);
 }

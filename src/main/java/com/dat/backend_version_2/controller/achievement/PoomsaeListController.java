@@ -6,11 +6,13 @@ import com.dat.backend_version_2.mapper.achievement.PoomsaeListMapper;
 import com.dat.backend_version_2.service.achievement.PoomsaeListService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/poomsae-lists")
@@ -33,14 +35,16 @@ public class PoomsaeListController {
     }
 
     @PostMapping
-    public ResponseEntity<String> create(@RequestBody List<CompetitorBaseDTO.CompetitorInputDTO> competitorDTOS) {
+    public ResponseEntity<String> create(@RequestBody CompetitorBaseDTO.CompetitorInputDTO competitorDTOS) {
         try {
             poomsaeListService.createPoomsaeList(competitorDTOS);
             return ResponseEntity.ok("All Poomsae lists created successfully");
         } catch (IdInvalidException e) {
+            log.error("IdInvalidException while creating Poomsae lists: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error while creating Poomsae lists");
+            log.error("Error while creating Poomsae lists", e);
+            return ResponseEntity.internalServerError().body("Error while creating Poomsae lists: " + e.getMessage());
         }
     }
 

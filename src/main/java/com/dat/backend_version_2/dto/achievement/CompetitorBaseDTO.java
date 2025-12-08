@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,8 +19,7 @@ public class CompetitorBaseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CompetitorInputDTO {
-        private String idAccount;
-        private Medal medal; // Giả sử Medal là một enum hoặc class
+        private Set<String> idAccounts;
         private CompetitionDTO competition;
     }
 

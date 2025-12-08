@@ -41,38 +41,42 @@ public class SparringListService {
     }
 
     @Transactional
-    public void createSparringList(List<CompetitorBaseDTO.CompetitorInputDTO> competitors) throws IdInvalidException {
-        if (competitors == null || competitors.isEmpty()) {
+    public void createSparringList(CompetitorBaseDTO.CompetitorInputDTO competitors) throws IdInvalidException {
+        if (competitors == null) {
             throw new IdInvalidException("Competitor list is empty");
         }
 
-        List<SparringList> sparringLists = new ArrayList<>(competitors.size());
+        if (competitors.getIdAccounts() == null || competitors.getIdAccounts().isEmpty()) {
+            throw new IdInvalidException("Competitor accounts list is empty");
+        }
 
-        for (CompetitorBaseDTO.CompetitorInputDTO competitor : competitors) {
+        String idTournament = competitors.getCompetition().getIdTournament();
+        String idCombination = competitors.getCompetition().getIdCombination();
+
+        List<SparringList> sparringLists = new ArrayList<>(competitors.getIdAccounts().size());
+
+        for (String idAccount : competitors.getIdAccounts()) {
             // Lấy sẵn thông tin
-            Student student = studentService.getStudentByIdAccount(competitor.getIdAccount());
+            Student student = studentService.getStudentByIdAccount(idAccount);
             if (student == null)
-                throw new IdInvalidException("Student not found: " + competitor.getIdAccount());
+                throw new IdInvalidException("Student not found: " + idAccount);
             if (!student.getIsActive())
-                throw new IdInvalidException("Student is not active: " + competitor.getIdAccount());
+                throw new IdInvalidException("Student is not active: " + idAccount);
 
-//            String tournamentId = competitor.getCompetition().getIdTournament();
-            String sparringCombId = competitor.getCompetition().getIdCombination();
-
-            Tournament tournament = tournamentService.getTournamentById(competitor.getCompetition().getIdTournament());
-            SparringCombination combination = sparringCombinationService.getCombinationById(sparringCombId);
+            Tournament tournament = tournamentService.getTournamentById(idTournament);
+            SparringCombination combination = sparringCombinationService.getCombinationById(idCombination);
 
             if (tournament == null)
-                throw new IdInvalidException("Tournament not found: " + competitor.getCompetition().getIdTournament());
+                throw new IdInvalidException("Tournament not found: " + idTournament);
             if (combination == null)
-                throw new IdInvalidException("Sparring Combination not found: " + sparringCombId);
+                throw new IdInvalidException("Sparring Combination not found: " + idCombination);
 
             // Build entity
             SparringList entity = new SparringList();
             entity.setStudent(student);
             entity.setTournament(tournament);
             entity.setSparringCombination(combination);
-            entity.setMedal(competitor.getMedal());
+            entity.setMedal(null);
             sparringLists.add(entity);
         }
 

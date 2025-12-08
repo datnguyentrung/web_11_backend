@@ -48,6 +48,7 @@ public class StudentAttendanceRedisImpl implements StudentAttendanceRedis {
         }
     }
 
+    @Override
     public List<StudentAttendanceDTO.StudentAttendanceDetail> getAttendanceByClassSessionAndDate(
             String idClassSession,
             LocalDate attendanceDate

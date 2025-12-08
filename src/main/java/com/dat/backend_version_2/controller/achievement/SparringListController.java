@@ -33,7 +33,7 @@ public class SparringListController {
     }
 
     @PostMapping
-    public ResponseEntity<String> create(@RequestBody List<CompetitorBaseDTO.CompetitorInputDTO> competitorDTOS) {
+    public ResponseEntity<String> create(@RequestBody CompetitorBaseDTO.CompetitorInputDTO competitorDTOS) {
         try {
             sparringListService.createSparringList(competitorDTOS);
             return ResponseEntity.ok("All Sparring lists created successfully");
