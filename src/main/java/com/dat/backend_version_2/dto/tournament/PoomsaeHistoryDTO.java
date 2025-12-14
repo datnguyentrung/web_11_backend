@@ -4,31 +4,22 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class PoomsaeHistoryDTO {
     private String idPoomsaeHistory;
-    private NodeInfo nodeInfo;
+    private TournamentDTO.NodeInfo nodeInfo;
     private ReferenceInfo referenceInfo;
     private Boolean hasWon;       // có chiến thắng hay không
-
-    // ----------- Thông tin node (vị trí trong cây) -----------
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class NodeInfo {
-        private Integer sourceNode;   // node gốc
-        private Integer targetNode;   // node mục tiêu
-        private Integer levelNode;    // cấp độ node
-    }
 
     // ----------- Thông tin liên kết tới danh sách và tổ hợp Poomsae -----------
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
     public static class ReferenceInfo {
-        private String name;
         private String poomsaeList;
         private String poomsaeCombination;
         private PoomsaeCategory poomsaeCategory;

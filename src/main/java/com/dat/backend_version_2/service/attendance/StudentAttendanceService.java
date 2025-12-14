@@ -41,6 +41,7 @@ public class StudentAttendanceService {
     private final ClassSessionService classSessionService;
     private final CoachService coachService;
     private final StudentService studentService;
+    private final StudentAttendanceMapper studentAttendanceMapper;
 
     // Tìm bản điểm danh theo id
     public StudentAttendance getStudentAttendanceById(AttendanceDTO.StudentAttendanceKey key) throws IdInvalidException {
@@ -112,9 +113,9 @@ public class StudentAttendanceService {
     }
 
     // Lấy danh sách điểm danh ở 1 lớp học trong ngày
-    public List<StudentAttendanceDTO.StudentAttendanceDetail> getAttendanceByClassSessionAndDate(String idClassSession, LocalDate attendanceDate) throws IdInvalidException {
+    public List<StudentAttendanceDTO.StudentAttendanceDetail> getAttendanceByClassSessionAndDate(String idClassSession, LocalDate attendanceDate) {
         return studentAttendanceRepository.findByIdClassSessionAndAttendanceDate(idClassSession, attendanceDate).stream()
-                .map(StudentAttendanceMapper::studentAttendanceToStudentAttendanceDetail)
+                .map(studentAttendanceMapper::studentAttendanceToStudentAttendanceDetail)
                 .toList();
     }
 
@@ -218,9 +219,7 @@ public class StudentAttendanceService {
         List<StudentAttendance> attendanceList = studentAttendanceRepository
                 .findByStudentAndYearAndQuarter(student, year, months);
         return attendanceList.stream()
-                .map(StudentAttendanceMapper::studentAttendanceToStudentAttendanceDetail)
+                .map(studentAttendanceMapper::studentAttendanceToStudentAttendanceDetail)
                 .toList();
     }
-
-
 }

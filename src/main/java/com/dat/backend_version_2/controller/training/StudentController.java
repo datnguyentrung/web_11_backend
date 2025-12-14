@@ -27,6 +27,7 @@ public class StudentController {
 
     private final StudentService studentService;
     private final StudentRedisImpl studentRedis;
+    private final StudentMapper studentMapper;
 
     /**
      * Tạo mới student
@@ -36,7 +37,7 @@ public class StudentController {
     public ResponseEntity<StudentRes.PersonalInfo> createStudent(
             @Valid @RequestBody StudentReq.StudentInfo studentInfo) throws IdInvalidException, JsonProcessingException {
         Student student = studentService.createStudent(studentInfo);
-        StudentRes.PersonalInfo personalInfo = StudentMapper.studentToPersonalInfo(student);
+        StudentRes.PersonalInfo personalInfo = studentMapper.studentToPersonalInfo(student);
 
         URI location = URI.create("/api/v1/students/" + student.getIdAccount());
 

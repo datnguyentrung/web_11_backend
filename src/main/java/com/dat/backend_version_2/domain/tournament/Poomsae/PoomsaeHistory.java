@@ -6,9 +6,12 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -32,4 +35,12 @@ public class PoomsaeHistory {
     private Integer targetNode;       // node mục tiêu
     private Integer levelNode;
     private Boolean hasWon;
+
+    @CreationTimestamp // Tự động gán thời gian hiện tại khi bản ghi được lưu lần đầu
+    @Column(name = "created_at", updatable = false) // Không cho phép cập nhật sau khi tạo
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp // Tự động cập nhật mỗi khi bản ghi được chỉnh sửa
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }

@@ -5,12 +5,17 @@ import com.dat.backend_version_2.dto.attendance.AttendanceDTO;
 import com.dat.backend_version_2.dto.attendance.StudentAttendanceDTO;
 import com.dat.backend_version_2.enums.attendance.AttendanceStatus;
 import com.dat.backend_version_2.mapper.training.StudentMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+@Component
+@RequiredArgsConstructor
 public class StudentAttendanceMapper {
+    private final StudentMapper studentMapper;
+
     public static AttendanceDTO.StudentAttendanceKey studentAttendanceToAttendanceKey(StudentAttendance studentAttendance) {
         if (studentAttendance == null) {
             return null;
@@ -76,14 +81,14 @@ public class StudentAttendanceMapper {
         return evaluationDetail;
     }
 
-    public static StudentAttendanceDTO.StudentAttendanceDetail studentAttendanceToStudentAttendanceDetail(StudentAttendance s) {
+    public StudentAttendanceDTO.StudentAttendanceDetail studentAttendanceToStudentAttendanceDetail(StudentAttendance s) {
         if (s == null) return null;
 
         AttendanceDTO.AttendanceInfo attendanceInfo = studentAttendanceToAttendanceInfo(s);
         var dto = new StudentAttendanceDTO.StudentAttendanceDetail();
         BeanUtils.copyProperties(attendanceInfo, dto);
         dto.setAttendanceDate(s.getAttendanceDate());
-        dto.setPersonalAcademicInfo(StudentMapper.studentToPersonalAcademicInfo(s.getStudent()));
+        dto.setPersonalAcademicInfo(studentMapper.studentToPersonalAcademicInfo(s.getStudent()));
         dto.setIdAccount(s.getStudent().getIdAccount());
         dto.setIdClassSession(s.getIdClassSession());
         return dto;

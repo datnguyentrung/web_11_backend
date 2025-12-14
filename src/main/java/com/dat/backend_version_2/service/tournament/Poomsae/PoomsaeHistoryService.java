@@ -5,8 +5,12 @@ import com.dat.backend_version_2.domain.tournament.BracketNode;
 import com.dat.backend_version_2.domain.tournament.Poomsae.PoomsaeCombination;
 import com.dat.backend_version_2.domain.tournament.Poomsae.PoomsaeHistory;
 import com.dat.backend_version_2.dto.tournament.BracketNodeReq;
+import com.dat.backend_version_2.dto.tournament.PoomsaeCombinationDTO;
 import com.dat.backend_version_2.dto.tournament.PoomsaeHistoryDTO;
+import com.dat.backend_version_2.dto.tournament.TournamentDTO;
+import com.dat.backend_version_2.enums.tournament.PoomsaeMode;
 import com.dat.backend_version_2.mapper.tournament.PoomsaeHistoryMapper;
+import com.dat.backend_version_2.mapper.tournament.TournamentMapper;
 import com.dat.backend_version_2.repository.achievement.PoomsaeListRepository;
 import com.dat.backend_version_2.repository.tournament.Poomsae.PoomsaeHistoryRepository;
 import com.dat.backend_version_2.service.achievement.PoomsaeListService;
@@ -135,99 +139,99 @@ public class PoomsaeHistoryService {
         poomsaeHistoryRepository.deleteAll(histories);
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
-    public void createWinnerForRoundRobin(PoomsaeHistoryDTO poomsaeHistoryDTO) throws IdInvalidException {
-        PoomsaeHistory poomsaeHistory = getPoomsaeHistoryById(poomsaeHistoryDTO.getIdPoomsaeHistory());
-        if (poomsaeHistory == null) {
-            throw new IdInvalidException("PoomsaeHistory not found");
-        }
-
-        PoomsaeList poomsaeList = poomsaeListService.getPoomsaeListById(poomsaeHistoryDTO.getReferenceInfo().getPoomsaeList());
-
-        // Đánh dấu đã thắng
-        poomsaeHistory.setHasWon(true);
-
-        // Lấy target node cha
-        int parentNode = poomsaeHistoryDTO.getNodeInfo().getTargetNode();
-        int levelNextNode = poomsaeHistoryDTO.getNodeInfo().getLevelNode() - 1;
-
-        if (levelNextNode < 0) {
-            throw new IllegalStateException("Already at top level — cannot create higher node");
-        }
-
-        // Kiểm tra vị trí đó đã có người thắng chưa
-        Optional<PoomsaeHistory> existingWinner = poomsaeHistoryRepository.findByIdPoomsaeCombinationAndLevelNodeAndSourceNode(
-                UUID.fromString(poomsaeHistoryDTO.getReferenceInfo().getPoomsaeCombination()),
-                levelNextNode,
-                parentNode
-        );
-        existingWinner.ifPresent(poomsaeHistoryRepository::delete);
-
-        // Tạo node mới cho vòng tiếp theo
-        PoomsaeHistory winPoomsaeHistory = new PoomsaeHistory();
-        winPoomsaeHistory.setSourceNode(parentNode);
-        winPoomsaeHistory.setLevelNode(levelNextNode);
-        winPoomsaeHistory.setPoomsaeList(poomsaeList);
-
-        poomsaeHistoryRepository.save(winPoomsaeHistory);
-    }
+//    @Transactional(isolation = Isolation.SERIALIZABLE)
+//    public void createWinnerForRoundRobin(PoomsaeHistoryDTO poomsaeHistoryDTO) throws IdInvalidException {
+//        PoomsaeHistory poomsaeHistory = getPoomsaeHistoryById(poomsaeHistoryDTO.getIdPoomsaeHistory());
+//        if (poomsaeHistory == null) {
+//            throw new IdInvalidException("PoomsaeHistory not found");
+//        }
+//
+//        PoomsaeList poomsaeList = poomsaeListService.getPoomsaeListById(poomsaeHistoryDTO.getReferenceInfo().getPoomsaeList());
+//
+//        // Đánh dấu đã thắng
+//        poomsaeHistory.setHasWon(true);
+//
+//        // Lấy target node cha
+//        int parentNode = poomsaeHistoryDTO.getNodeInfo().getTargetNode();
+//        int levelNextNode = poomsaeHistoryDTO.getNodeInfo().getLevelNode() - 1;
+//
+//        if (levelNextNode < 0) {
+//            throw new IllegalStateException("Already at top level — cannot create higher node");
+//        }
+//
+//        // Kiểm tra vị trí đó đã có người thắng chưa
+//        Optional<PoomsaeHistory> existingWinner = poomsaeHistoryRepository.findByIdPoomsaeCombinationAndLevelNodeAndSourceNode(
+//                UUID.fromString(poomsaeHistoryDTO.getReferenceInfo().getPoomsaeCombination()),
+//                levelNextNode,
+//                parentNode
+//        );
+//        existingWinner.ifPresent(poomsaeHistoryRepository::delete);
+//
+//        // Tạo node mới cho vòng tiếp theo
+//        PoomsaeHistory winPoomsaeHistory = new PoomsaeHistory();
+//        winPoomsaeHistory.setSourceNode(parentNode);
+//        winPoomsaeHistory.setLevelNode(levelNextNode);
+//        winPoomsaeHistory.setPoomsaeList(poomsaeList);
+//
+//        poomsaeHistoryRepository.save(winPoomsaeHistory);
+//    }
 
     @Transactional
-    public String createWinnerForElimination(PoomsaeHistoryDTO poomsaeHistoryDTO, int participants) throws IdInvalidException {
-        // Lấy lịch sử thi đấu hiện tại
-        PoomsaeHistory poomsaeHistory = getPoomsaeHistoryById(poomsaeHistoryDTO.getIdPoomsaeHistory());
-        if (poomsaeHistory == null) {
-            throw new IdInvalidException("PoomsaeHistory not found");
-        }
+    public void createWinnerForElimination(String idHistory, int participants) throws IdInvalidException {
+        // 1. Lấy lịch sử người thắng
+        PoomsaeHistory winner = poomsaeHistoryRepository.findById(UUID.fromString(idHistory))
+                .orElseThrow(() -> new IdInvalidException("PoomsaeHistory not found"));
 
-        // Đánh dấu đã thắng
-        poomsaeHistory.setHasWon(true);
-        poomsaeHistoryRepository.save(poomsaeHistory);
+        // 2. Cập nhật người thắng
+        winner.setHasWon(true);
+        poomsaeHistoryRepository.save(winner); // Hibernate có thể tự batch update cuối transaction, nhưng save explicit cho rõ ràng
 
-        // Lấy target node cha
-        Integer parentNode = Optional.ofNullable(
-                bracketNodeService.getBracketNodeByParticipantsAndChildNodeId(participants, poomsaeHistory.getTargetNode())
-        ).map(BracketNode::getParentNodeId).orElse(null);
-
-        // Đánh dấu thua cho đối thủ cùng parentNode(nếu có)
-        List<PoomsaeHistory> siblings = poomsaeHistoryRepository.findAllByTargetNodeAndIdPoomsaeCombination(
-                poomsaeHistory.getTargetNode(),
-                poomsaeHistory.getPoomsaeList().getPoomsaeCombination().getIdPoomsaeCombination()
+        /// 3. Tìm đối thủ (Sibling) - Query tối ưu
+        Optional<PoomsaeHistory> opponentOpt = poomsaeHistoryRepository.findOpponentByNode(
+                winner.getPoomsaeList().getTournament().getIdTournament(),
+                winner.getPoomsaeList().getPoomsaeCombination().getIdPoomsaeCombination(),
+                winner.getTargetNode(),
+                winner.getIdPoomsaeHistory()
         );
 
-        for (PoomsaeHistory sibling : siblings) {
-            if (!sibling.getIdPoomsaeHistory().equals(poomsaeHistory.getIdPoomsaeHistory())) {
-                sibling.setHasWon(false);
-                poomsaeHistoryRepository.save(sibling);
+        // 4. Xử lý người thua (nếu có đối thủ)
+        if (opponentOpt.isPresent()) {
+            PoomsaeHistory opponent = opponentOpt.get();
+            opponent.setHasWon(false);
+            poomsaeHistoryRepository.save(opponent);
 
-                if (poomsaeHistory.getLevelNode() == 2) {
-                    PoomsaeHistory losePoomsaeHistory = new PoomsaeHistory();
-                    losePoomsaeHistory.setLevelNode(-1);
-                    losePoomsaeHistory.setSourceNode(sibling.getTargetNode());
-                    losePoomsaeHistory.setTargetNode(-1);
-                    losePoomsaeHistory.setPoomsaeList(sibling.getPoomsaeList());
-                    poomsaeHistoryRepository.save(losePoomsaeHistory);
-                }
+            // Logic tạo nhánh thua (Tranh giải 3 hoặc tương tự)
+            if (winner.getLevelNode() == 2) {
+                PoomsaeHistory loseHistory = new PoomsaeHistory();
+                loseHistory.setLevelNode(-1);
+                loseHistory.setSourceNode(opponent.getTargetNode());
+                loseHistory.setTargetNode(-1);
+                loseHistory.setPoomsaeList(opponent.getPoomsaeList()); // Hibernate chỉ copy reference ID, không cần fetch Student
+                poomsaeHistoryRepository.save(loseHistory);
             }
+        } else {
+            // Tùy nghiệp vụ: Có thể throw lỗi nếu bắt buộc phải có đối thủ, hoặc bỏ qua nếu là vòng bye (miễn đấu)
+            // throw new IdInvalidException("Sibling not found...");
         }
 
-        if ((poomsaeHistoryDTO.getNodeInfo().getTargetNode() != 0 && poomsaeHistoryDTO.getNodeInfo().getTargetNode() != -1)
-                && parentNode == null) {
-            throw new IdInvalidException("Parent node not found for targetNode " + poomsaeHistory.getTargetNode());
+        // 5. Tính toán Parent Node
+        Integer parentNodeId = Optional.ofNullable(
+                bracketNodeService.getBracketNodeByParticipantsAndChildNodeId(participants, winner.getTargetNode())
+        ).map(BracketNode::getParentNodeId).orElse(null);
+
+        // Validate Parent Node
+        if ((winner.getTargetNode() != 0 && winner.getTargetNode() != -1) && parentNodeId == null) {
+            throw new IdInvalidException("Parent node not found for targetNode " + winner.getTargetNode());
         }
 
-        // Tạo node mới cho vòng tiếp theo
-        PoomsaeHistory winPoomsaeHistory = new PoomsaeHistory();
-        winPoomsaeHistory.setLevelNode(poomsaeHistory.getLevelNode() - 1);
-        winPoomsaeHistory.setSourceNode(poomsaeHistory.getTargetNode());
-        winPoomsaeHistory.setTargetNode(parentNode);
+        // 6. Tạo Node thắng tiến vào vòng trong
+        PoomsaeHistory nextRoundHistory = new PoomsaeHistory();
+        nextRoundHistory.setLevelNode(winner.getLevelNode() - 1);
+        nextRoundHistory.setSourceNode(winner.getTargetNode());
+        nextRoundHistory.setTargetNode(parentNodeId);
+        nextRoundHistory.setPoomsaeList(winner.getPoomsaeList());
 
-        // Sao chép thông tin liên kết
-        winPoomsaeHistory.setPoomsaeList(poomsaeHistory.getPoomsaeList());
-
-        poomsaeHistoryRepository.save(winPoomsaeHistory);
-
-        return winPoomsaeHistory.getIdPoomsaeHistory().toString();
+        poomsaeHistoryRepository.save(nextRoundHistory);
     }
 
     /**
@@ -315,11 +319,32 @@ public class PoomsaeHistoryService {
                 .toList();
     }
 
-    public boolean checkPoomsaeHistoryExists(String idTournament, String idCombination, String idAccount) {
-        return poomsaeHistoryRepository.existsByFilter(
+    public PoomsaeCombinationDTO.CheckModeResponse checkPoomsaeMode(String idTournament, String idCombination, String idAccount) {
+        Optional<String> result = poomsaeHistoryRepository.findModeByFilter(
                 idTournament != null ? UUID.fromString(idTournament) : null,
                 idCombination != null ? UUID.fromString(idCombination) : null,
                 idAccount != null ? studentService.getStudentByIdAccount(idAccount).getIdUser() : null
         );
+        // Xử lý kết quả (Mapping)
+        if (result.isPresent()) {
+            // TRƯỜNG HỢP CÓ DỮ LIỆU (TRUE)
+            // Convert String từ DB sang Enum
+            PoomsaeMode mode = PoomsaeMode.valueOf(result.get());
+            return new PoomsaeCombinationDTO.CheckModeResponse(true, mode);
+        } else {
+            // TRƯỜNG HỢP KHÔNG CÓ DỮ LIỆU (FALSE)
+            return new PoomsaeCombinationDTO.CheckModeResponse(false, null);
+        }
+    }
+
+    public List<TournamentDTO.HistoryInfo> getPoomsaeHistoryByFilter(String idTournament, String idCombination, String idAccount) {
+        return poomsaeHistoryRepository.findByFilter(
+                        UUID.fromString(idTournament),
+                        UUID.fromString(idCombination),
+                        idAccount != null ? studentService.getStudentByIdAccount(idAccount).getIdUser() : null
+                )
+                .stream()
+                .map(TournamentMapper::historyInfoQuickViewToHistoryInfo)
+                .toList();
     }
 }

@@ -2,6 +2,7 @@ package com.dat.backend_version_2.repository.tournament.Poomsae;
 
 import com.dat.backend_version_2.domain.tournament.Poomsae.PoomsaeCombination;
 import com.dat.backend_version_2.domain.tournament.Poomsae.PoomsaeHistory;
+import com.dat.backend_version_2.repository.tournament.HistoryInfoQuickView;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,17 +25,18 @@ public interface PoomsaeHistoryRepository extends JpaRepository<PoomsaeHistory, 
     List<PoomsaeHistory> findAllByPoomsaeCombination(@Param("poomsaeCombination") PoomsaeCombination poomsaeCombination);
 
     @Query("""
-            SELECT DISTINCT ph
-                FROM PoomsaeHistory ph
-                    JOIN FETCH ph.poomsaeList pl
-                    JOIN FETCH pl.student s
-                    JOIN FETCH pl.poomsaeCombination pc
-                WHERE pc.idPoomsaeCombination = :idPoomsaeCombination
-                  AND ph.targetNode = :targetNode
+            SELECT ph
+            FROM PoomsaeHistory ph
+            WHERE ph.poomsaeList.tournament.idTournament = :tournamentId
+                AND ph.poomsaeList.poomsaeCombination.idPoomsaeCombination = :combinationId
+                AND ph.targetNode = :targetNode
+                AND ph.idPoomsaeHistory != :winnerId
             """)
-    List<PoomsaeHistory> findAllByTargetNodeAndIdPoomsaeCombination(
+    Optional<PoomsaeHistory> findOpponentByNode(
+            @Param("tournamentId") UUID idTournament,
+            @Param("combinationId") UUID combinationId,
             @Param("targetNode") Integer targetNode,
-            @Param("idPoomsaeCombination") UUID idPoomsaeCombination
+            @Param("winnerId") UUID winnerId
     );
 
     Integer countPoomsaeHistoryByLevelNode(Integer levelNode);
@@ -69,17 +71,42 @@ public interface PoomsaeHistoryRepository extends JpaRepository<PoomsaeHistory, 
 
 
     @Query(value = """
-            SELECT EXISTS(SELECT 1
-              FROM tournament.poomsae_history ph
-                   JOIN achievement.poomsae_list pl
-                        ON ph.poomsae_list = pl.id_poomsae_list
-              WHERE pl.tournament = :idTournament
-                AND pl.poomsae_combination = :idPoomsaeCombination
-                AND (:idUser IS NULL OR pl.student_id_user = :idUser));
+            SELECT DISTINCT pc.poomsae_mode
+            FROM tournament.poomsae_history ph
+                 JOIN achievement.poomsae_list pl ON ph.poomsae_list = pl.id_poomsae_list
+                JOIN tournament.poomsae_combination pc ON pl.poomsae_combination = pc.id_poomsae_combination
+            WHERE pl.tournament = :idTournament
+              AND pl.poomsae_combination = :idPoomsaeCombination
+              AND (:idUser IS NULL OR pl.student_id_user = :idUser)
+            LIMIT 1
             """, nativeQuery = true)
-    boolean existsByFilter(
+    Optional<String> findModeByFilter(
             @Param("idTournament") UUID idTournament,
             @Param("idPoomsaeCombination") UUID idPoomsaeCombination,
             @Param("idUser") UUID idUser
+    );
+
+    @Query(value = """
+            SELECT ph.id_poomsae_history AS idHistory,
+                ph.has_won               AS hasWon,
+            
+                ph.source_node           AS sourceNode,
+                ph.target_node           AS targetNode,
+                ph.level_node            AS levelNode,
+            
+                s.name                   AS studentName,
+                s.id_national            AS nationalId,
+                s.birth_date             AS birthDate,
+                s.is_active              AS isActiveStudent
+            FROM tournament.poomsae_history ph
+                 JOIN achievement.poomsae_list pl on ph.poomsae_list = pl.id_poomsae_list
+                 JOIN training.student s on pl.student_id_user = s.id_user
+            WHERE pl.tournament = :tournamentId
+              AND pl.poomsae_combination = :combinationId
+              AND (:userId IS NULL OR pl.student_id_user = :userId)""", nativeQuery = true)
+    List<HistoryInfoQuickView> findByFilter(
+            @Param("tournamentId") UUID idTournament,
+            @Param("combinationId") UUID idCombination,
+            @Param("userId") UUID idUser
     );
 }

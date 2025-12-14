@@ -26,6 +26,7 @@ public class UsersController {
     private final UsersService usersService;
     private final CoachService coachService;
     private final StudentService studentService;
+    private final StudentMapper studentMapper;
 
     @PostMapping("/me/change-password")
     public ResponseEntity<RestResponse<String>> changePassword(
@@ -50,7 +51,7 @@ public class UsersController {
         return switch (role) {
             case "STUDENT" -> {
                 Student student = studentService.getStudentById(idUser);
-                yield ResponseEntity.ok(StudentMapper.studentToUserRes(student));
+                yield ResponseEntity.ok(studentMapper.studentToUserRes(student));
             }
             case "COACH" -> {
                 Coach coach = coachService.getCoachById(UUID.fromString(idUser));

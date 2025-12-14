@@ -6,7 +6,6 @@ import com.dat.backend_version_2.domain.tournament.Tournament;
 import com.dat.backend_version_2.enums.tournament.PoomsaeMode;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;

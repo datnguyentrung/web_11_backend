@@ -10,12 +10,12 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/bracket-node")
+@RequestMapping("/api/v1/bracket-nodes")
 public class BracketNodeController {
     private final BracketNodeService bracketNodeService;
 
     @PostMapping("/participants")
-    public ResponseEntity<String> getSigma(@RequestBody Integer participants) {
+    public ResponseEntity<String> createSigma(@RequestBody Integer participants) {
         bracketNodeService.createBracketNodeAllowParticipants(participants);
         return ResponseEntity.ok("Created sigma with " + participants + " participants");
     }

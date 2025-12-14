@@ -2,13 +2,14 @@ package com.dat.backend_version_2.mapper.tournament;
 
 import com.dat.backend_version_2.domain.tournament.Poomsae.PoomsaeHistory;
 import com.dat.backend_version_2.dto.tournament.PoomsaeHistoryDTO;
+import com.dat.backend_version_2.dto.tournament.TournamentDTO;
 
 public class PoomsaeHistoryMapper {
 
     public static PoomsaeHistoryDTO poomsaeHistoryToPoomsaeHistoryDTO(PoomsaeHistory poomsaeHistory) {
         if (poomsaeHistory == null) return null;
         PoomsaeHistoryDTO dto = new PoomsaeHistoryDTO();
-        dto.setIdPoomsaeHistory(String.valueOf(poomsaeHistory.getIdPoomsaeHistory()));
+        dto.setIdPoomsaeHistory(poomsaeHistory.getIdPoomsaeHistory().toString());
         dto.setReferenceInfo(poomsaeHistoryToReferenceInfo(poomsaeHistory));
         dto.setNodeInfo(poomsaeHistoryToNodeInfo(poomsaeHistory));
         dto.setHasWon(poomsaeHistory.getHasWon());
@@ -23,10 +24,8 @@ public class PoomsaeHistoryMapper {
         var poomsaeList = poomsaeHistory.getPoomsaeList();
 
         if (poomsaeList != null) {
-            var student = poomsaeList.getStudent();
             var combination = poomsaeList.getPoomsaeCombination();
 
-            referenceInfo.setName(student != null ? student.getName() : null);
             referenceInfo.setPoomsaeList(String.valueOf(poomsaeList.getIdPoomsaeList()));
             referenceInfo.setPoomsaeCombination(
                     combination != null ? String.valueOf(combination.getIdPoomsaeCombination()) : null
@@ -50,9 +49,9 @@ public class PoomsaeHistoryMapper {
         return poomsaeCategory;
     }
 
-    public static PoomsaeHistoryDTO.NodeInfo poomsaeHistoryToNodeInfo(PoomsaeHistory poomsaeHistory) {
+    public static TournamentDTO.NodeInfo poomsaeHistoryToNodeInfo(PoomsaeHistory poomsaeHistory) {
         if (poomsaeHistory == null) return null;
-        PoomsaeHistoryDTO.NodeInfo nodeInfo = new PoomsaeHistoryDTO.NodeInfo();
+        TournamentDTO.NodeInfo nodeInfo = new TournamentDTO.NodeInfo();
         nodeInfo.setTargetNode(poomsaeHistory.getTargetNode());
         nodeInfo.setSourceNode(poomsaeHistory.getSourceNode());
         nodeInfo.setLevelNode(poomsaeHistory.getLevelNode());

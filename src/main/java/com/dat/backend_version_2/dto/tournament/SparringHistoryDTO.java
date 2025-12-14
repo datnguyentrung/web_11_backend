@@ -11,19 +11,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SparringHistoryDTO {
     private String idSparringHistory;
-    private NodeInfo nodeInfo;
+    private TournamentDTO.NodeInfo nodeInfo;
     private ReferenceInfo referenceInfo;
     private Boolean hasWon;       // có chiến thắng hay không
-
-    // ----------- Thông tin node (vị trí trong cây) -----------
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class NodeInfo {
-        private Integer sourceNode;   // node gốc
-        private Integer targetNode;   // node mục tiêu
-        private Integer levelNode;    // cấp độ node
-    }
 
     // ----------- Thông tin liên kết tới danh sách và tổ hợp Poomsae -----------
     @Data

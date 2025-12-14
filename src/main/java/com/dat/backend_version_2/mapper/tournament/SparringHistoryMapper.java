@@ -2,6 +2,7 @@ package com.dat.backend_version_2.mapper.tournament;
 
 import com.dat.backend_version_2.domain.tournament.Sparring.SparringHistory;
 import com.dat.backend_version_2.dto.tournament.SparringHistoryDTO;
+import com.dat.backend_version_2.dto.tournament.TournamentDTO;
 
 public class SparringHistoryMapper {
     public static SparringHistoryDTO sparringHistoryToSparringHistoryDTO(SparringHistory sparringHistory) {
@@ -53,9 +54,9 @@ public class SparringHistoryMapper {
         return combinationCategory;
     }
 
-    public static SparringHistoryDTO.NodeInfo sparringHistoryToNodeInfo(SparringHistory sparringHistory) {
+    public static TournamentDTO.NodeInfo sparringHistoryToNodeInfo(SparringHistory sparringHistory) {
         if (sparringHistory == null) return null;
-        SparringHistoryDTO.NodeInfo nodeInfo = new SparringHistoryDTO.NodeInfo();
+        TournamentDTO.NodeInfo nodeInfo = new TournamentDTO.NodeInfo();
         nodeInfo.setTargetNode(sparringHistory.getTargetNode());
         nodeInfo.setSourceNode(sparringHistory.getSourceNode());
         nodeInfo.setLevelNode(sparringHistory.getLevelNode());

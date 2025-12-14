@@ -7,157 +7,145 @@ import com.dat.backend_version_2.dto.training.Student.StudentReq;
 import com.dat.backend_version_2.dto.training.Student.StudentRes;
 import com.dat.backend_version_2.enums.training.BeltLevel;
 import com.dat.backend_version_2.repository.training.StudentQuickView;
+import org.mapstruct.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
-public class StudentMapper {
-    public static void personalInfoToStudent(StudentReq.PersonalInfo personalInfo, Student student) {
-        if (personalInfo == null) {
-            return;
-        }
-        student.setName(personalInfo.getName());
-        String idUserStr = personalInfo.getIdUser();
+@Mapper(componentModel = "spring")
+public interface StudentMapper {
+
+    @Mapping(target = "name", source = "personalInfo.name")
+    @Mapping(target = "idUser", source = "personalInfo.idUser", qualifiedByName = "stringToUUID")
+    @Mapping(target = "idNational", source = "personalInfo.idNational")
+    @Mapping(target = "birthDate", source = "personalInfo.birthDate")
+    void personalInfoToStudent(StudentReq.PersonalInfo personalInfo, @MappingTarget Student student);
+
+    @Mapping(target = "phone", source = "contactInfo.phone")
+    @Mapping(target = "member", source = "contactInfo.member")
+    void contactInfoToStudent(StudentReq.ContactInfo contactInfo, @MappingTarget Student student);
+
+    @Mapping(target = "startDate", source = "enrollmentInfo.startDate", defaultExpression = "java(java.time.LocalDate.now())")
+    @Mapping(target = "endDate", source = "enrollmentInfo.endDate")
+    void enrollmentInfoToStudent(StudentReq.EnrollmentInfo enrollmentInfo, @MappingTarget Student student);
+
+    @Mapping(target = "name", source = "student.name")
+    @Mapping(target = "idAccount", source = "student.idAccount")
+    @Mapping(target = "idNational", source = "student.idNational")
+    @Mapping(target = "birthDate", source = "student.birthDate")
+    @Mapping(target = "isActive", source = "student.isActive")
+    StudentRes.PersonalInfo studentToPersonalInfo(Student student);
+
+    @Mapping(target = "idBranch", source = "student.branch.idBranch")
+    @Mapping(target = "beltLevel", source = "student.beltLevel")
+    @Mapping(target = "classSessions", source = "student.studentClassSessions", qualifiedByName = "studentClassSessionsToIds")
+    StudentRes.AcademicInfo studentToAcademicInfo(Student student);
+
+    @Mapping(target = "personalInfo", source = "student")
+    @Mapping(target = "academicInfo", source = "student")
+    StudentRes.PersonalAcademicInfo studentToPersonalAcademicInfo(Student student);
+
+    @Mapping(target = "idUser", source = "student.idUser")
+    @Mapping(target = "idAccount", source = "student.idAccount")
+    @Mapping(target = "email", source = "student.email")
+    @Mapping(target = "idRole", source = "student.role.idRole")
+    UserRes.UserInfo studentToUserInfo(Student student);
+
+    @Mapping(target = "birthDate", source = "student.birthDate")
+    @Mapping(target = "isActive", source = "student.isActive")
+    @Mapping(target = "name", source = "student.name")
+    @Mapping(target = "phone", source = "student.phone")
+    @Mapping(target = "beltLevel", source = "student.beltLevel")
+    UserRes.UserProfile studentToUserProfile(Student student);
+
+    @Mapping(target = "userInfo", source = "student")
+    @Mapping(target = "userProfile", source = "student")
+    UserRes studentToUserRes(Student student);
+
+    @Mapping(target = "name", source = "view.name")
+    @Mapping(target = "idAccount", source = "view.idAccount")
+    @Mapping(target = "idNational", source = "view.idNational")
+    @Mapping(target = "birthDate", source = "view.birthDate", qualifiedByName = "stringToLocalDate")
+    @Mapping(target = "isActive", source = "view.isActive")
+    StudentRes.PersonalInfo studentQuickViewToPersonalInfo(StudentQuickView view);
+
+    @Mapping(target = "idBranch", source = "view.idBranch")
+    @Mapping(target = "beltLevel", source = "view.beltLevel", qualifiedByName = "stringToBeltLevel")
+    @Mapping(target = "classSessions", source = "view.classSessions", qualifiedByName = "stringToClassSessionList")
+    StudentRes.AcademicInfo studentQuickViewToAcademicInfo(StudentQuickView view);
+
+    @Mapping(target = "personalInfo", source = "view")
+    @Mapping(target = "academicInfo", source = "view")
+    StudentRes.PersonalAcademicInfo studentQuickViewToPersonalAcademicInfo(StudentQuickView view);
+
+    /**
+     * Convert Student to PersonalAcademicInfo WITHOUT loading studentClassSessions
+     * to avoid N+1 query problem
+     */
+    @NoClassSessions
+    @Mapping(target = "personalInfo", source = "student")
+    @Mapping(target = "academicInfo", source = "student", qualifiedByName = "studentToAcademicInfoNoClassSessions")
+    StudentRes.PersonalAcademicInfo studentToPersonalAcademicInfoWithoutClassSessions(Student student);
+    /**
+     * Convert Student to AcademicInfo WITHOUT loading studentClassSessions
+     * to avoid N+1 query problem
+     */
+    @Named("studentToAcademicInfoNoClassSessions")
+    @Mapping(target = "idBranch", source = "branch.idBranch")
+    @Mapping(target = "beltLevel", source = "beltLevel")
+    @Mapping(target = "classSessions", expression = "java(java.util.Collections.emptyList())")
+    StudentRes.AcademicInfo toAcademicInfoNoClassSessions(Student student);
+
+    // Named mapping methods
+    @Named("stringToUUID")
+    default UUID stringToUUID(String idUserStr) {
         if (idUserStr != null && !idUserStr.isBlank()) {
             try {
-                UUID parsedId = UUID.fromString(idUserStr);
-                student.setIdUser(parsedId);
+                return UUID.fromString(idUserStr);
             } catch (IllegalArgumentException e) {
-                // Nếu chuỗi không phải UUID hợp lệ thì bạn có thể:
-                // - bỏ qua để giữ UUID mặc định
-                // - hoặc throw exception để báo input sai
-                // Ở đây mình giả sử giữ mặc định
+                // Nếu chuỗi không phải UUID hợp lệ thì giữ null
+                return null;
             }
         }
-        student.setIdNational(personalInfo.getIdNational());
-        student.setBirthDate(personalInfo.getBirthDate());
+        return null;
     }
 
-    public static void contactInfoToStudent(StudentReq.ContactInfo contactInfo, Student student) {
-        if (contactInfo == null) {
-            return;
+    @Named("stringToLocalDate")
+    default LocalDate stringToLocalDate(String dateStr) {
+        if (dateStr != null && !dateStr.isBlank()) {
+            return LocalDate.parse(dateStr);
         }
-        student.setPhone(contactInfo.getPhone());
-        student.setMember(contactInfo.getMember());
+        return null;
     }
 
-    public static void enrollmentInfoToStudent(StudentReq.EnrollmentInfo enrollmentInfo, Student student) {
-        if (enrollmentInfo == null) {
-            return;
+    @Named("stringToBeltLevel")
+    default BeltLevel stringToBeltLevel(String beltLevelStr) {
+        if (beltLevelStr != null && !beltLevelStr.isBlank()) {
+            return BeltLevel.valueOf(beltLevelStr);
         }
-        student.setStartDate(
-                Optional.ofNullable(enrollmentInfo.getStartDate())
-                        .orElse(LocalDate.now())
-        );
-        student.setEndDate(enrollmentInfo.getEndDate());
+        return null;
     }
 
-    public static StudentRes.PersonalInfo studentToPersonalInfo(Student student) {
-        if (student == null) return null;
-        return new StudentRes.PersonalInfo(
-                student.getName(),
-                student.getIdAccount(),
-                student.getIdNational(),
-                student.getBirthDate(),
-                student.getIsActive()
-        );
-    }
-
-    public static StudentRes.AcademicInfo studentToAcademicInfo(Student student) {
-        if (student == null) return null;
-        return new StudentRes.AcademicInfo(
-                student.getBranch().getIdBranch(),
-                student.getBeltLevel(),
-                student.getStudentClassSessions()
-                        .stream()
-                        .map(StudentClassSession::getIdClassSession)
-                        .toList()
-        );
-    }
-
-    public static StudentRes.PersonalAcademicInfo studentToPersonalAcademicInfo(Student student) {
-        if (student == null) return null;
-
-        StudentRes.PersonalInfo personalInfo = studentToPersonalInfo(student);
-        StudentRes.AcademicInfo academicInfo = studentToAcademicInfo(student);
-
-        return new StudentRes.PersonalAcademicInfo(personalInfo, academicInfo);
-    }
-
-    public static UserRes.UserInfo studentToUserInfo(Student student) {
-        if (student == null) return null;
-        return new UserRes.UserInfo(
-                student.getIdUser(),
-                student.getIdAccount(),
-                student.getEmail(),
-                student.getRole().getIdRole()
-        );
-    }
-
-    public static UserRes.UserProfile studentToUserProfile(Student student) {
-        if (student == null) return null;
-        return new UserRes.UserProfile(
-                student.getBirthDate(),
-                student.getIsActive(),
-                student.getName(),
-                student.getPhone(),
-                student.getBeltLevel()
-        );
-    }
-
-    public static UserRes studentToUserRes(Student student) {
-        if (student == null) return null;
-        return new UserRes(
-                studentToUserInfo(student),
-                studentToUserProfile(student)
-        );
-    }
-
-    public static StudentRes.PersonalInfo studentQuickViewToPersonalInfo(StudentQuickView view) {
-        if (view == null) return null;
-        LocalDate birthDate = null;
-        if (view.getBirthDate() != null && !view.getBirthDate().isBlank()) {
-            birthDate = LocalDate.parse(view.getBirthDate());
-        }
-        return new StudentRes.PersonalInfo(
-                view.getName(),
-                view.getIdAccount(),
-                view.getIdNational(),
-                birthDate,
-                view.getIsActive()
-        );
-    }
-
-    public static StudentRes.AcademicInfo studentQuickViewToAcademicInfo(StudentQuickView view) {
-        if (view == null) return null;
-        BeltLevel beltLevel = null;
-        if (view.getBeltLevel() != null && !view.getBeltLevel().isBlank()) {
-            beltLevel = BeltLevel.valueOf(view.getBeltLevel());
-        }
-        // Xử lý chuỗi lớp học thành danh sách
-        List<String> classSessions = new ArrayList<>();
-        if (view.getClassSessions() != null && !view.getClassSessions().isBlank()) {
-            String[] sessionsArray = view.getClassSessions().split(",");
+    @Named("stringToClassSessionList")
+    default List<String> stringToClassSessionList(String classSessionsStr) {
+        if (classSessionsStr != null && !classSessionsStr.isBlank()) {
+            String[] sessionsArray = classSessionsStr.split(",");
+            List<String> classSessions = new ArrayList<>();
             for (String session : sessionsArray) {
                 classSessions.add(session.trim());
             }
+            return classSessions;
         }
-        return new StudentRes.AcademicInfo(
-                view.getIdBranch(),
-                beltLevel,
-                classSessions
-        );
+        return new ArrayList<>();
     }
 
-    public static StudentRes.PersonalAcademicInfo studentQuickViewToPersonalAcademicInfo (StudentQuickView view){
-        if (view == null) return null;
-
-        StudentRes.PersonalInfo personalInfo = studentQuickViewToPersonalInfo(view);
-        StudentRes.AcademicInfo academicInfo = studentQuickViewToAcademicInfo(view);
-
-        return new StudentRes.PersonalAcademicInfo(personalInfo, academicInfo);
+    @Named("studentClassSessionsToIds")
+    default List<String> studentClassSessionsToIds(List<StudentClassSession> sessions) {
+        if (sessions == null) {
+            return new ArrayList<>();
+        }
+        return sessions.stream()
+                .map(StudentClassSession::getIdClassSession)
+                .toList();
     }
 }

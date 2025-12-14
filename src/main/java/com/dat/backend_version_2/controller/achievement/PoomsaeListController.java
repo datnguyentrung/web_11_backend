@@ -2,7 +2,7 @@ package com.dat.backend_version_2.controller.achievement;
 
 import com.dat.backend_version_2.domain.achievement.PoomsaeList;
 import com.dat.backend_version_2.dto.achievement.CompetitorBaseDTO;
-import com.dat.backend_version_2.mapper.achievement.PoomsaeListMapper;
+import com.dat.backend_version_2.mapper.achievement.CompetitorMapper;
 import com.dat.backend_version_2.service.achievement.PoomsaeListService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
 import lombok.RequiredArgsConstructor;
@@ -18,15 +18,7 @@ import java.util.List;
 @RequestMapping("/api/v1/poomsae-lists")
 public class PoomsaeListController {
     private final PoomsaeListService poomsaeListService;
-
-    @GetMapping
-    public ResponseEntity<List<CompetitorBaseDTO>> getAll() {
-        List<CompetitorBaseDTO> result = poomsaeListService.getAllPoomsaeList()
-                .stream()
-                .map(PoomsaeListMapper::poomsaeListToCompetitorBaseDTO)
-                .toList();
-        return ResponseEntity.ok(result);
-    }
+    private final CompetitorMapper competitorMapper;
 
     @GetMapping("/{id}")
     public ResponseEntity<PoomsaeList> getById(@PathVariable String id
@@ -48,27 +40,32 @@ public class PoomsaeListController {
         }
     }
 
-    @GetMapping("/tournament/{idTournament}")
-    public ResponseEntity<List<CompetitorBaseDTO>> getByIdTournament(
-            @PathVariable String idTournament) throws IdInvalidException {
-        List<CompetitorBaseDTO> poomsaeListDTOS = poomsaeListService
-                .getPoomsaeListByIdTournament(idTournament)
-                .stream()
-                .map(PoomsaeListMapper::poomsaeListToCompetitorBaseDTO)
-                .toList();
-        return ResponseEntity.ok(poomsaeListDTOS);
-    }
-
     @GetMapping("/filter")
-    public ResponseEntity<List<CompetitorBaseDTO>> getByFilter(
+    public ResponseEntity<CompetitorBaseDTO> getByFilter(
             @RequestParam String idTournament,
             @RequestParam String idCombination,
             @RequestParam(required = false) Integer idBranch,
             @RequestParam(required = false) String idAccount
     ) throws IdInvalidException {
-        return ResponseEntity.ok(poomsaeListService.getPoomsaeListByFilter(idTournament, idCombination, idAccount, idBranch)
-                .stream()
-                .map(PoomsaeListMapper::poomsaeListToCompetitorBaseDTO)
-                .toList());
+        // 1. Xử lý logic lấy danh sách và loại bỏ trùng lặp
+        List<CompetitorBaseDTO.CompetitorDetailDTO> competitors = poomsaeListService.getPoomsaeListByFilter(
+                        idTournament,
+                        idCombination,
+                        idAccount,
+                        idBranch
+                ).stream()
+                .map(competitorMapper::poomsaeListToCompetitorDTO)
+                .toList();
+
+        // 2. Đóng gói vào DTO
+        CompetitorBaseDTO result = new CompetitorBaseDTO(
+                competitors,
+                new CompetitorBaseDTO.CompetitionDTO(
+                        idTournament,
+                        idCombination
+                )
+        );
+
+        return ResponseEntity.ok(result);
     }
 }

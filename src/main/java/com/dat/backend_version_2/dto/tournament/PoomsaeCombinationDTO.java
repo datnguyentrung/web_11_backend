@@ -37,4 +37,12 @@ public class PoomsaeCombinationDTO {
         private AgeGroupDTO ageGroupDTO;
         private PoomsaeMode poomsaeMode;
     }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CheckModeResponse {
+        private boolean exists;
+        private PoomsaeMode poomsaeMode;
+    }
 }

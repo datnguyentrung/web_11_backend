@@ -35,11 +35,6 @@ public class SparringListService {
                 .orElseThrow(() -> new IdInvalidException("SparringList not found with id: " + idSparringList));
     }
 
-    public List<SparringList> getSparringListByIdTournament(String idTournament) throws IdInvalidException {
-        Tournament tournament = tournamentService.getTournamentById(idTournament);
-        return sparringListRepository.findByTournament(tournament);
-    }
-
     @Transactional
     public void createSparringList(CompetitorBaseDTO.CompetitorInputDTO competitors) throws IdInvalidException {
         if (competitors == null) {

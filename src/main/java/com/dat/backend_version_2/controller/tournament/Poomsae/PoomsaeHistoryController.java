@@ -1,6 +1,8 @@
 package com.dat.backend_version_2.controller.tournament.Poomsae;
 
+import com.dat.backend_version_2.dto.tournament.PoomsaeCombinationDTO;
 import com.dat.backend_version_2.dto.tournament.PoomsaeHistoryDTO;
+import com.dat.backend_version_2.dto.tournament.TournamentDTO;
 import com.dat.backend_version_2.mapper.tournament.PoomsaeHistoryMapper;
 import com.dat.backend_version_2.service.tournament.Poomsae.PoomsaeHistoryService;
 import com.dat.backend_version_2.util.error.IdInvalidException;
@@ -29,6 +31,15 @@ public class PoomsaeHistoryController {
                 .toList());
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<List<TournamentDTO.HistoryInfo>> getPoomsaeHistoryByFilter(
+            @RequestParam String idTournament,
+            @RequestParam String idCombination,
+            @RequestParam(required = false) String idAccount
+    ) throws IdInvalidException {
+        return ResponseEntity.ok(poomsaeHistoryService.getPoomsaeHistoryByFilter(idTournament, idCombination, idAccount));
+    }
+
     @GetMapping("/tournament/{idTournament}")
     public ResponseEntity<List<PoomsaeHistoryDTO>> getByIdTournament(@PathVariable String idTournament) throws IdInvalidException {
         return ResponseEntity.ok(poomsaeHistoryService.getAllPoomsaeHistoryByIdTournament(idTournament));
@@ -40,14 +51,13 @@ public class PoomsaeHistoryController {
         return ResponseEntity.ok(poomsaeHistoryService.getAllPoomsaeHistoryByIdPoomsaeCombination(idPoomsaeConbination));
     }
 
-    @GetMapping("/exists")
-    public ResponseEntity<Boolean> checkPoomsaeHistoryExists(
+    @GetMapping("/check-existence")
+    public ResponseEntity<PoomsaeCombinationDTO.CheckModeResponse> checkExistence(
             @RequestParam String idTournament,
             @RequestParam(required = false) String idCombination,
             @RequestParam(required = false) String idAccount
     ) throws IdInvalidException {
-        boolean exists = poomsaeHistoryService.checkPoomsaeHistoryExists(idTournament,idCombination, idAccount);
-        return ResponseEntity.ok(exists);
+        return ResponseEntity.ok(poomsaeHistoryService.checkPoomsaeMode(idTournament,idCombination, idAccount));
     }
 
     // ========================================================================
@@ -67,10 +77,10 @@ public class PoomsaeHistoryController {
     @PostMapping("/elimination/winner")
     public ResponseEntity<String> createPoomsaeWinner(
             @RequestParam int participants,
-            @RequestBody PoomsaeHistoryDTO poomsaeHistoryDTO
+            @RequestParam String idHistory
     ) throws IdInvalidException {
-        String newNodeId = poomsaeHistoryService.createWinnerForElimination(poomsaeHistoryDTO, participants);
-        return ResponseEntity.ok("Winner created successfully with new node ID: " + newNodeId);
+        poomsaeHistoryService.createWinnerForElimination(idHistory, participants);
+        return ResponseEntity.ok("Winner created successfully");
     }
 
     @DeleteMapping("/elimination")
@@ -96,18 +106,13 @@ public class PoomsaeHistoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Poomsae history created");
     }
 
-    @PostMapping("/round-robin/winner")
-    public ResponseEntity<String> createRoundRobinWinner(
-            @RequestBody PoomsaeHistoryDTO poomsaeHistoryDTO
-    ) throws IdInvalidException {
-        poomsaeHistoryService.createWinnerForRoundRobin(poomsaeHistoryDTO);
-
-        String message = String.format(
-                "✅ Winner processed successfully for combination: %s",
-                poomsaeHistoryDTO.getReferenceInfo().getName()
-        );
-        return ResponseEntity.ok(message);
-    }
+//    @PostMapping("/round-robin/winner")
+//    public ResponseEntity<String> createRoundRobinWinner(
+//            @RequestBody PoomsaeHistoryDTO poomsaeHistoryDTO
+//    ) throws IdInvalidException {
+//        poomsaeHistoryService.createWinnerForRoundRobin(poomsaeHistoryDTO);
+//        return ResponseEntity.ok("Winner created successfully");
+//    }
 
     @DeleteMapping("/round-robin")
     public ResponseEntity<String> deletePoomsaeHistoryForRoundRobin(

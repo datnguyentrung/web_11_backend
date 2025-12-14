@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class StudentService {
     private final StudentRepository studentRepository;
+    private final StudentMapper studentMapper;
     private final BranchService branchService;
     private final UsersService usersService;
     private final ClassSessionService classSessionService;
@@ -75,11 +76,11 @@ public class StudentService {
         );
 
         // Personal Info
-        StudentMapper.personalInfoToStudent(studentInfo.getPersonal(), student);
+        studentMapper.personalInfoToStudent(studentInfo.getPersonal(), student);
         // Contact Info
-        StudentMapper.contactInfoToStudent(studentInfo.getContact(), student);
+        studentMapper.contactInfoToStudent(studentInfo.getContact(), student);
         // Enrollment Info
-        StudentMapper.enrollmentInfoToStudent(studentInfo.getEnrollment(), student);
+        studentMapper.enrollmentInfoToStudent(studentInfo.getEnrollment(), student);
 
         // Gọi hàm setup chung cho Users
         usersService.setupBaseUser(student, "STUDENT");
@@ -98,7 +99,7 @@ public class StudentService {
 
     public List<StudentRes.PersonalAcademicInfo> getAllStudents() {
         return studentRepository.findAllWithBranchAndSessions().stream()
-                .map(StudentMapper::studentToPersonalAcademicInfo) // tái sử dụng hàm đã viết
+                .map(studentMapper::studentToPersonalAcademicInfo) // tái sử dụng hàm đã viết
                 .toList();
     }
 
@@ -112,7 +113,7 @@ public class StudentService {
     public List<StudentRes.PersonalAcademicInfo> getStudentsByIdBranch(Integer idBranch) throws IdInvalidException, JsonProcessingException {
         Branch branch = branchService.getBranchById(idBranch);
         return studentRepository.findByBranch(branch).stream()
-                .map(StudentMapper::studentToPersonalAcademicInfo)
+                .map(studentMapper::studentToPersonalAcademicInfo)
                 .toList();
     }
 
@@ -124,7 +125,7 @@ public class StudentService {
         }
 
         return studentRepository.findAllByIdClassSession(classSession).stream()
-                .map(StudentMapper::studentToPersonalAcademicInfo)
+                .map(studentMapper::studentToPersonalAcademicInfo)
                 .toList();
     }
 
@@ -174,13 +175,13 @@ public class StudentService {
             // LOGIC TÌM THEO SỐ ĐIỆN THOẠI
             String searchPhone = normalizedKeyword.replaceAll("[^0-9]", ""); // Chỉ giữ lại chữ số
             return studentRepository.searchByPhoneNumber(searchPhone).stream()
-                    .map(StudentMapper::studentQuickViewToPersonalAcademicInfo)
+                    .map(studentMapper::studentQuickViewToPersonalAcademicInfo)
                     .toList();
         } else {
             // LOGIC TÌM THEO TÊN
             String searchName = normalizedKeyword.toLowerCase();
             return studentRepository.searchByName(searchName).stream()
-                    .map(StudentMapper::studentQuickViewToPersonalAcademicInfo)
+                    .map(studentMapper::studentQuickViewToPersonalAcademicInfo)
                     .toList();
 //            throw new UnsupportedOperationException("Search by name is not implemented yet.");
         }

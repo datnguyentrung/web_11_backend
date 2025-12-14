@@ -6,14 +6,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class CompetitorBaseDTO {
-    private String idCompetitor;
-    private CompetitorDetailDTO competitorDetailDTO;
+    private List<CompetitorDetailDTO> competitorDetailDTO;
+    private CompetitionDTO competitionDTO;
 
     @Data
     @NoArgsConstructor
@@ -27,9 +28,9 @@ public class CompetitorBaseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CompetitorDetailDTO {
-        private StudentRes.PersonalAcademicInfo personalAcademicInfo;
+        private String idCompetitor;
+        private StudentRes.PersonalInfo personalInfo;
         private Medal medal; // Giả sử Medal là một enum hoặc class
-        private CompetitionDTO competition;
     }
 
     @Data
