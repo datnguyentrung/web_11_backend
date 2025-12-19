@@ -55,4 +55,14 @@ public interface PoomsaeListRepository extends JpaRepository<PoomsaeList, UUID> 
             @Param("studentId") UUID studentId,
             @Param("branchId") Integer branchId
     );
+
+    @Query(value = """
+            SELECT count(*)
+            FROM achievement.poomsae_list AS pl
+            WHERE pl.tournament = :tournamentId
+              AND pl.poomsae_combination = :combinationId;""", nativeQuery = true)
+    Integer countDistinctParticipantsInCombination(
+            @Param("tournamentId") UUID idTournament,
+            @Param("combinationId") UUID idPoomsaeCombination
+    );
 }

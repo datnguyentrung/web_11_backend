@@ -24,9 +24,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PoomsaeCombinationService {
     private final PoomsaeCombinationRepository poomsaeCombinationRepository;
-    private final PoomsaeContentService poomsaeContentService;
-    private final BeltGroupService beltGroupService;
-    private final AgeGroupService ageGroupService;
     private final TournamentService tournamentService;
 
     @Transactional(readOnly = true)  // Giữ session active cho đến khi response được serialize

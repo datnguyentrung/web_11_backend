@@ -74,12 +74,11 @@ public class PoomsaeHistoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Poomsae history created");
     }
 
-    @PostMapping("/elimination/winner")
+    @PostMapping("/elimination/winner/{idHistory}")
     public ResponseEntity<String> createPoomsaeWinner(
-            @RequestParam int participants,
-            @RequestParam String idHistory
+            @PathVariable String idHistory
     ) throws IdInvalidException {
-        poomsaeHistoryService.createWinnerForElimination(idHistory, participants);
+        poomsaeHistoryService.createWinnerForElimination(idHistory);
         return ResponseEntity.ok("Winner created successfully");
     }
 

@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -36,7 +35,6 @@ public class PoomsaeHistoryService {
     private final PoomsaeListRepository poomsaeListRepository;
     private final PoomsaeCombinationService poomsaeCombinationService;
     private static final Logger log = LoggerFactory.getLogger(PoomsaeHistoryService.class);
-    private final PoomsaeListService poomsaeListService;
     private final StudentService studentService;
 
     public PoomsaeHistory getPoomsaeHistoryById(String id) throws IdInvalidException {
@@ -177,9 +175,9 @@ public class PoomsaeHistoryService {
 //    }
 
     @Transactional
-    public void createWinnerForElimination(String idHistory, int participants) throws IdInvalidException {
+    public void createWinnerForElimination(String idHistory) throws IdInvalidException {
         // 1. Lấy lịch sử người thắng
-        PoomsaeHistory winner = poomsaeHistoryRepository.findById(UUID.fromString(idHistory))
+        PoomsaeHistory winner = poomsaeHistoryRepository.findByIdWithCombination(UUID.fromString(idHistory))
                 .orElseThrow(() -> new IdInvalidException("PoomsaeHistory not found"));
 
         // 2. Cập nhật người thắng
@@ -214,6 +212,13 @@ public class PoomsaeHistoryService {
             // throw new IdInvalidException("Sibling not found...");
         }
 
+//        int participants = poomsaeListRepository.countDistinctParticipantsInCombination(
+//                winner.getPoomsaeList().getTournament().getIdTournament(),
+//                winner.getPoomsaeList().getPoomsaeCombination().getIdPoomsaeCombination()
+//        );
+        System.out.println("hello");
+        int participants = winner.getPoomsaeList().getPoomsaeCombination().getParticipants();
+        System.out.println("participants: " + participants);
         // 5. Tính toán Parent Node
         Integer parentNodeId = Optional.ofNullable(
                 bracketNodeService.getBracketNodeByParticipantsAndChildNodeId(participants, winner.getTargetNode())

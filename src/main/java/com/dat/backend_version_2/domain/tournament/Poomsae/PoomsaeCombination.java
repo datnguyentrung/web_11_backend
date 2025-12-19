@@ -6,6 +6,7 @@ import com.dat.backend_version_2.domain.tournament.Tournament;
 import com.dat.backend_version_2.enums.tournament.PoomsaeMode;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -43,6 +44,9 @@ public class PoomsaeCombination {
 
     @Enumerated(EnumType.STRING)
     private PoomsaeMode poomsaeMode = PoomsaeMode.ELIMINATION;
+
+    @Column(name = "participants", nullable = false, columnDefinition = "int default 0")
+    private Integer participants = 0;
 
     public PoomsaeCombination(Tournament tournament,PoomsaeContent poomsaeContent, AgeGroup ageGroup, BeltGroup beltGroup) {
         this.tournament = tournament;

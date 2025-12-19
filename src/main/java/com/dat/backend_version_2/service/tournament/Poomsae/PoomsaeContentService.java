@@ -15,9 +15,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PoomsaeContentService {
     private final PoomsaeContentRepository poomsaeContentRepository;
-    private final AgeGroupRepository ageGroupRepository;
-    private final BeltGroupRepository beltGroupRepository;
-    private final PoomsaeCombinationRepository poomsaeCombinationRepository;
 
     public List<PoomsaeContent> getAllPoomsaeContent() {
         return poomsaeContentRepository.findAll();

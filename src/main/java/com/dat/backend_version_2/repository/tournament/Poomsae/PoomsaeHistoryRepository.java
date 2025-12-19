@@ -15,6 +15,16 @@ import java.util.UUID;
 @Repository
 public interface PoomsaeHistoryRepository extends JpaRepository<PoomsaeHistory, UUID> {
     @Query("""
+            SELECT ph
+            FROM PoomsaeHistory ph
+            JOIN FETCH ph.poomsaeList pl
+            JOIN FETCH pl.poomsaeCombination pc
+            JOIN FETCH pl.tournament t
+            WHERE ph.idPoomsaeHistory = :idPoomsaeHistory
+            """)
+    Optional<PoomsaeHistory> findByIdWithCombination(@Param("idPoomsaeHistory") UUID idPoomsaeHistory);
+
+    @Query("""
                 SELECT DISTINCT ph
                 FROM PoomsaeHistory ph
                     JOIN FETCH ph.poomsaeList pl
@@ -27,6 +37,7 @@ public interface PoomsaeHistoryRepository extends JpaRepository<PoomsaeHistory, 
     @Query("""
             SELECT ph
             FROM PoomsaeHistory ph
+            JOIN FETCH ph.poomsaeList pl
             WHERE ph.poomsaeList.tournament.idTournament = :tournamentId
                 AND ph.poomsaeList.poomsaeCombination.idPoomsaeCombination = :combinationId
                 AND ph.targetNode = :targetNode
